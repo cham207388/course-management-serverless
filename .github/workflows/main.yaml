@@ -21,7 +21,7 @@ jobs:
       - name: Build frontend
         uses: cham207388/github-custom-actions/vite-node@main
         with:
-          directory: ./web-s3          
+          directory: ./web-s3
 
       - name: Deploy Lambda
         uses: cham207388/github-custom-actions/tf-no-ssh@main
@@ -30,4 +30,31 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}"
+          variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }},domain_name=${{ secrets.DOMAIN_NAME }}"
+          
+      - name: Save Terraform Outputs
+        id: tf_outputs
+        run: |
+          cd terraform
+          echo "BUCKET_NAME=$(terraform output -raw frontend_bucket)" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
+          
+      - name: ☁️ Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: ${{ env.BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "web-s3/dist"
+          
+      - name: 🔁 Invalidate CloudFront Cache
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ env.CLOUDFRONT_DIST_ID }}
+          PATHS: "/*"
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

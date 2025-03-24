@@ -8,7 +8,14 @@ output "api_custom_domain_url" {
   value       = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}"
 }
 
-# output "swagger_ui_url" {
-#   description = "Swagger UI for the deployed API"
-#   value       = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}/swagger-ui/index.html"
-# }
+output "frontend_url" {
+  value = "https://${var.frontend_domain}"
+}
+
+output "frontend_bucket" {
+  value = aws_s3_bucket.frontend.bucket
+}
+
+output "cloudfront_distribution_id" {
+  value = aws_cloudfront_distribution.frontend_cdn.id
+}
