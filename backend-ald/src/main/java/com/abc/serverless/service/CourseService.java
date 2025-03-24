@@ -1,14 +1,16 @@
 package com.abc.serverless.service;
 
-import com.abc.serverless.dto.Course;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.abc.serverless.dto.Course;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 
 
 @Slf4j
@@ -22,7 +24,7 @@ public class CourseService {
         log.info("Adding course request to DynamoDB: {}", course);
 
         course.setId(UUID.randomUUID().toString());
-        log.info("Adding course entity to DynamoDB: {}", course);
+        log.info("Course entity saved to DynamoDB");
         courseTable.putItem(course);
     }
 
