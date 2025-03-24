@@ -2,6 +2,7 @@ resource "aws_api_gateway_rest_api" "course_management" {
   name        = "course-management"
   description = "REST API for Spring Boot Lambda"
 
+  # meant to resolve swagger
   binary_media_types = [
     "application/octet-stream",
     "application/javascript",
