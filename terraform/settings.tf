@@ -11,7 +11,7 @@ terraform {
 
   backend "s3" {
     bucket         = "project-terraform-state-abc"
-    key            = "spring-boot-lambda/terraform.tfstate"
+    key            = "course-management/terraform.tfstate"
     region         = "us-east-2"
     dynamodb_table = "project-terraform-state-lock"
   }
