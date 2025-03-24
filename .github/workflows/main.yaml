@@ -1,0 +1,29 @@
+name: Deployment
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build project
+        uses: cham207388/github-custom-actions/mvn-jdk21@main
+        with:
+          directory: ./backend-ald
+
+      - name: Deploy Lambda
+        uses: cham207388/github-custom-actions/terraform@main
+        with:
+          directory: ./terraform
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}"
