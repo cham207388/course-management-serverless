@@ -64,7 +64,7 @@ resource "aws_api_gateway_stage" "dev_stage" {
 
 # custom domain and mapping
 resource "aws_api_gateway_domain_name" "custom_domain" {
-  domain_name              = "dev.alhagiebaicham.com"
+  domain_name              = "coursebe.alhagiebaicham.com"
   regional_certificate_arn = var.acm_certificate_arn
 
   endpoint_configuration {

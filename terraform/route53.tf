@@ -2,9 +2,9 @@ data "aws_route53_zone" "primary" {
   name = "alhagiebaicham.com"
 }
 
-resource "aws_route53_record" "dev_alias" {
+resource "aws_route53_record" "couse_be_alias" {
   zone_id = data.aws_route53_zone.primary.zone_id
-  name    = "dev.alhagiebaicham.com"
+  name    = "coursebe.alhagiebaicham.com"
   type    = "A"
 
   alias {
