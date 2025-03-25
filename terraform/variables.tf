@@ -10,3 +10,7 @@ variable "acm_certificate_arn" {
 variable "domain_name" {
   description = "domain name"
 }
+
+variable "frontend_url" {
+  default = "course.alhagiebaicham.com"
+}

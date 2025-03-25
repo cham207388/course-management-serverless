@@ -13,7 +13,7 @@ resource "aws_cloudfront_origin_access_control" "s3_access" {
 resource "aws_cloudfront_distribution" "frontend_cdn" {
   enabled             = true
   default_root_object = "index.html"
-  aliases             = [var.frontend_domain]
+  aliases             = [var.frontend_url]
 
   origin {
     domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name

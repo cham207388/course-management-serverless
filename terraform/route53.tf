@@ -18,7 +18,7 @@ resource "aws_route53_record" "couse_be_alias" {
 
 resource "aws_route53_record" "frontend_alias" {
   zone_id = data.aws_route53_zone.primary.zone_id
-  name    = var.frontend_domain
+  name    = var.frontend_url
   type    = "A"
 
   alias {

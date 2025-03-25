@@ -9,7 +9,7 @@ output "api_custom_domain_url" {
 }
 
 output "frontend_url" {
-  value = "https://${var.frontend_domain}"
+  value = "https://${var.frontend_url}"
 }
 
 output "frontend_bucket" {

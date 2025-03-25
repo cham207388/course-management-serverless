@@ -6,8 +6,8 @@ resource "aws_lambda_function" "course_management" {
   timeout       = 300
   role          = aws_iam_role.lambda_exec_role.arn
 
-  filename         = "${path.module}/../backend-ald/target/backend-ald-1.0-SNAPSHOT-lambda-package.zip"
-  source_code_hash = filebase64sha256("${path.module}/../backend-ald/target/backend-ald-1.0-SNAPSHOT-lambda-package.zip")
+  filename         = "${path.module}/../backend-ald/target/backend-ald-1.0.0-lambda-package.zip"
+  source_code_hash = filebase64sha256("${path.module}/../backend-ald/target/backend-ald-1.0.0-lambda-package.zip")
 
   depends_on = [
     aws_iam_role_policy_attachment.lambda_logs,

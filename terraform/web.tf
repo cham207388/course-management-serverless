@@ -1,9 +1,5 @@
-variable "frontend_domain" {
-  default = "course.alhagiebaicham.com"
-}
-
 resource "aws_s3_bucket" "frontend" {
-  bucket        = var.frontend_domain
+  bucket        = var.frontend_url
   force_destroy = true
 }
 
