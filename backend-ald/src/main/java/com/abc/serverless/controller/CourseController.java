@@ -20,7 +20,7 @@ import com.abc.serverless.service.CourseService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/courses")
+@RequestMapping("/api/v2/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
