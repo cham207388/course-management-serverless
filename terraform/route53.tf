@@ -1,7 +1,4 @@
-data "aws_route53_zone" "primary" {
-  name = var.domain_name
-}
-
+# backend
 resource "aws_route53_record" "couse_be_alias" {
   zone_id = data.aws_route53_zone.primary.zone_id
   name    = "coursebe.${var.domain_name}"
@@ -16,6 +13,7 @@ resource "aws_route53_record" "couse_be_alias" {
   depends_on = [aws_api_gateway_domain_name.custom_domain]
 }
 
+# frontend
 resource "aws_route53_record" "frontend_alias" {
   zone_id = data.aws_route53_zone.primary.zone_id
   name    = var.frontend_url

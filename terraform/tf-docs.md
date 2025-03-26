@@ -57,7 +57,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_api_custom_domain_url"></a> [api\_custom\_domain\_url](#output\_api\_custom\_domain\_url) | Base URL for your API using custom domain |
+| <a name="output_backend_url"></a> [api\_custom\_domain\_url](#output\_api\_custom\_domain\_url) | Base URL for your API using custom domain |
 | <a name="output_api_invoke_url"></a> [api\_invoke\_url](#output\_api\_invoke\_url) | Base URL to access the deployed API |
 | <a name="output_cloudfront_distribution_id"></a> [cloudfront\_distribution\_id](#output\_cloudfront\_distribution\_id) | n/a |
 | <a name="output_frontend_bucket"></a> [frontend\_bucket](#output\_frontend\_bucket) | n/a |

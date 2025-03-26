@@ -40,7 +40,6 @@ resource "aws_s3_bucket_public_access_block" "frontend" {
   restrict_public_buckets = false
 }
 
-# refactor candidate to cloudfront.tf
 resource "aws_cloudfront_origin_access_control" "s3_access" {
   name                              = "frontend-s3-access"
   origin_access_control_origin_type = "s3"
@@ -90,4 +89,14 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
   }
 }
 
-// refactor canditate to route53.t
+resource "aws_route53_record" "frontend_alias" {
+  zone_id = data.aws_route53_zone.primary.zone_id
+  name    = var.frontend_url
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.frontend_cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend_cdn.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
