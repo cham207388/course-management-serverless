@@ -27,5 +27,5 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}acm_cert_arn_agw=${{ secrets.ACM_CERT_ARN_AGW }},domain_name=${{ secrets.DOMAIN_NAME }}"
+          variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }},acm_cert_arn_agw=${{ secrets.ACM_CERT_ARN_AGW }},domain_name=${{ secrets.DOMAIN_NAME }}"
           destroy: "yes"
