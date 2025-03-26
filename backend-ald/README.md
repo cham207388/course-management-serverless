@@ -1,82 +1,157 @@
-# backend-ald serverless API
-The backend-ald project, created with [`aws-serverless-java-container`](https://github.com/aws/serverless-java-container).
+# Serverless Spring Boot 3 + AWS (Lambda, API Gateway, DynamoDB, Terraform Custom Domain)
 
-The starter project defines a simple `/ping` resource that can accept `GET` requests with its tests.
+- [Serverless Spring Boot 3 + AWS (Lambda, API Gateway, DynamoDB, Terraform Custom Domain)](#serverless-spring-boot-3--aws-lambda-api-gateway-dynamodb-terraform-custom-domain)
+  - [Summary of Components](#summary-of-components)
+  - [Step-by-Step Architecture and Dependency Flow](#step-by-step-architecture-and-dependency-flow)
+    - [1️⃣ Spring Boot Application Setup](#1️⃣-spring-boot-application-setup)
+      - [Project Structure](#project-structure)
+      - [Dependencies:](#dependencies)
+      - [Api Endpoints](#api-endpoints)
+    - [2️⃣ Lambda Configuration (Terraform)](#2️⃣-lambda-configuration-terraform)
+      - [✅ Lambda uses:](#-lambda-uses)
+    - [3️⃣ API Gateway (Terraform)](#3️⃣-api-gateway-terraform)
+    - [4️⃣ DynamoDB Table (Terraform)](#4️⃣-dynamodb-table-terraform)
+    - [5️⃣ IAM Role for Lambda (Terraform)](#5️⃣-iam-role-for-lambda-terraform)
+    - [6️⃣ ACM Certificate (Manual or Terraform)](#6️⃣-acm-certificate-manual-or-terraform)
+    - [7️⃣ Route53 + Custom Domain Mapping](#7️⃣-route53--custom-domain-mapping)
 
-The project folder also includes a `template.yml` file. You can use this [SAM](https://github.com/awslabs/serverless-application-model) file to deploy the project to AWS Lambda and Amazon API Gateway or test in local with the [SAM CLI](https://github.com/awslabs/aws-sam-cli). 
 
-## Pre-requisites
-* [AWS CLI](https://aws.amazon.com/cli/)
-* [SAM CLI](https://github.com/awslabs/aws-sam-cli)
-* [Gradle](https://gradle.org/) or [Maven](https://maven.apache.org/)
+A serverless RESTful API using Spring Boot 3, deployed to AWS Lambda behind API Gateway, storing data in DynamoDB, documented via Swagger, and exposed with a custom domain through Route 53 + ACM. All infrastructure is provisioned with Terraform.
 
-## Building the project
-You can use the SAM CLI to quickly build the project
-```bash
-$ `mvn archetype:generate -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-springboot3-archetype -DarchetypeVersion=2.1.2 -DgroupId=com.abc.serverless -DartifactId=backend-ald -Dversion=1.0.0 -DinteractiveMode=false
-$ cd backend-ald
-$ sam build
-Building resource 'BackendAldFunction'
-Running JavaGradleWorkflow:GradleBuild
-Running JavaGradleWorkflow:CopyArtifacts
+## Summary of Components
 
-Build Succeeded
+| Component   | Purpose                                                                |
+|-------------|------------------------------------------------------------------------|
+| Spring Boot | REST API using Controllers, DTOs, and Service classes                  |
+| AWS Lambda  | Hosts the application packaged as a ZIP from Maven build               |
+| API Gateway | Acts as a frontend proxy for Lambda (ANY /{proxy+} integration)        |
+| DynamoDB    | Serverless NoSQL database to persist Course data                       |
+| Terraform   | Infrastructure as code for API Gateway, Lambda, DynamoDB, Route53, etc |
+| ACM (Cert)  | SSL Certificate for dev.your.domain.com                                |
+| Route 53    | DNS Zone hosting dev.your.domain.com as custom domain                  |
 
-Built Artifacts  : .aws-sam/build
-Built Template   : .aws-sam/build/template.yaml
 
-Commands you can use next
-=========================
-[*] Invoke Function: sam local invoke
-[*] Deploy: sam deploy --guided
+## Step-by-Step Architecture and Dependency Flow
+
+### 1️⃣ Spring Boot Application Setup
+
+| Task                                                      | Description                                                                                                                                                                                                                                                     |
+|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Generate Project using mvn archetype                      | ```mvn archetype:generate -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-springboot3-archetype -DarchetypeVersion=2.1.2 -DgroupId=com.abc.serverless -DartifactId=backend-ald -Dversion=1.0.0 -DinteractiveMode=false``` |
+| Create Controller, DTO, Service                           | Your app manages a Course with id, name, price fields                                                                                                                                                                                                           |
+| Use DynamoDB Enhanced Client                              | You manually inject DynamoDbTable<Course> and manage data                                                                                                                                                                                                       |
+| Enable Swagger UI                                         | springdoc-openapi renders docs at /swagger-ui                                                                                                                                                                                                                   |
+| Package as ZIP for Lambda                                 | mvn clean package with maven-assembly-plugin or maven-shade-plugin to create:                                                                                                                                                                                   |
+| target/spring-boot-lambda-1.0-SNAPSHOT-lambda-package.zip | lambda source                                                                                                                                                                                                                                                   |
+
+#### Project Structure
+
+```text
+spring-boot-lambda/
+├── src/
+│   ├── assembly/
+│   ├── main/
+│       └── java/
+│       └── resources/
+│   ├── test/
+├── target/
+│   └── spring-boot-lambda-1.0-SNAPSHOT-lambda-package.zip 👈 Lambda zip
+├── terraform/
+│   ├── lambda.tf
+│   ├── api-gateway.tf
+│   ├── iam-permissions.tf
+│   ├── dynamo-db.tf
+│   └── route53.tf
+├── pom.xml
+└── README.md
+└── Notes.md
 ```
 
-## Testing locally with the SAM CLI
+#### Dependencies:
+- Spring Boot → builds app logic → generates Lambda ZIP
+- Swagger UI → embedded as static assets → served from Lambda
+- Lambda uses the ZIP to execute API logic
+- Terraform for IaC
+- GitHub action for CI/CD
 
-From the project root folder - where the `template.yml` file is located - start the API with the SAM CLI.
+#### Api Endpoints
 
-```bash
-$ sam local start-api
+| Method | Path          | Description            |
+|--------|---------------|------------------------|
+| GET    | /courses      | List all courses       |
+| GET    | /courses/{id} | Get course by ID       |
+| POST   | /courses      | Add new course         |
+| PUT    | /courses/{id} | Update existing course |
+| DELETE | /courses/{id} | Delete course          |
 
-...
-Mounting com.amazonaws.serverless.archetypes.StreamLambdaHandler::handleRequest (java11) at http://127.0.0.1:3000/{proxy+} [OPTIONS GET HEAD POST PUT DELETE PATCH]
-...
-```
 
-Using a new shell, you can send a test ping request to your API:
+### 2️⃣ Lambda Configuration (Terraform)
 
-```bash
-$ curl -s http://127.0.0.1:3000/ping | python -m json.tool
+[Lambda Config](./terraform/lambda.tf)
 
-{
-    "pong": "Hello, World!"
-}
-``` 
+#### ✅ Lambda uses:
 
-## Deploying to AWS
-To deploy the application in your AWS account, you can use the SAM CLI's guided deployment process and follow the instructions on the screen
+- Your packaged Spring Boot zip
+-  Role with DynamoDB + CloudWatch access
 
-```
-$ sam deploy --guided
-```
+### 3️⃣ API Gateway (Terraform)
 
-Once the deployment is completed, the SAM CLI will print out the stack's outputs, including the new application URL. You can use `curl` or a web browser to make a call to the URL
+[Api Gateway](./terraform/api-gateway.tf)
 
-```
-...
--------------------------------------------------------------------------------------------------------------
-OutputKey-Description                        OutputValue
--------------------------------------------------------------------------------------------------------------
-BackendAldApi - URL for application            https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/pets
--------------------------------------------------------------------------------------------------------------
-```
+| Task                            | Description                         |
+|---------------------------------|-------------------------------------|
+| Create REST API                 | aws_api_gateway_rest_api.course_api |
+| Create {proxy+} resource        | Enables routing of all requests     |
+| ANY method + Lambda proxy       | Forwards request to Lambda          |
+| Create stage dev                | Maps the deployment                 |
+| Deployment triggers on zip hash | Ensures redeploy on code change     |
 
-Copy the `OutputValue` into a browser or use curl to test your first request:
+- API Gateway → Proxies to Lambda
+- Swagger UI is served as static content through API Gateway
+- Stage name is dev
+- Terraform can output base URL if needed
 
-```bash
-$ curl -s https://xxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/ping | python -m json.tool
+### 4️⃣ DynamoDB Table (Terraform)
 
-{
-    "pong": "Hello, World!"
-}
-```
+[DynamoDB Table](./terraform/dynamodb.tf)
+
+| Attribute | Type   | Key Type      |
+|-----------|--------|---------------|
+| id        | String | Partition Key |
+| name      | String | Attribute     |
+| price     | Number | Attribute     |
+
+- Lambda can access DynamoDB via IAM
+- @DynamoDbPartitionKey on getId() enables Enhanced Client mapping
+
+### 5️⃣ IAM Role for Lambda (Terraform)
+
+[IAM Config](./terraform/iam-permissions.tf)
+
+- Least privilege policy for DynamoDB access
+- CloudWatch logging enabled
+
+### 6️⃣ ACM Certificate (Manual or Terraform)
+
+ACM cert must be in us-east-1, even if your API is in another region.
+
+[ACM in us-east-1](./terraform/acm.tf)
+
+| Step                              | Description                                               |
+|-----------------------------------|-----------------------------------------------------------|
+| Request ACM cert in us-east-1     | Required for API Gateway custom domain                    |
+| Use dev.your.domain.com as SAN    | Validates via Route53                                     |
+| Once issued, use ARN in Terraform | acm_arn variable is passed to aws_api_gateway_domain_name |
+
+### 7️⃣ Route53 + Custom Domain Mapping
+
+[Route53](./terraform/route53.tf)
+
+| Task                                     | Description                                     |
+|------------------------------------------|-------------------------------------------------|
+| Create aws_api_gateway_domain_name       | With your custom domain and cert                |
+| Create aws_api_gateway_base_path_mapping | Links your REST API stage (dev) to domain       |
+| Create aws_route53_record A alias        | Points to API Gateway's CloudFront distribution |
+
+- [access your app](https://dev.your.domain.com/courses)
+- [Swagger at](https://dev.your.domain.com/swagger-ui)
