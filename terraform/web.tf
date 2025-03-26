@@ -29,6 +29,7 @@ resource "aws_s3_bucket_policy" "public_read" {
       }
     ]
   })
+  depends_on = [aws_s3_bucket_public_access_block.frontend]
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {
@@ -91,3 +92,15 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
 }
 
 // refactor canditate to route53.t
+# frontend
+resource "aws_route53_record" "frontend_alias" {
+  zone_id = data.aws_route53_zone.primary.zone_id
+  name    = var.frontend_url
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.frontend_cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend_cdn.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
