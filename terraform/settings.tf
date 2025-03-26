@@ -5,7 +5,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.42" // current version 5.42.0
+      version = "~> 5.0" // current version 5.42.0
     }
   }
 
@@ -19,4 +19,11 @@ terraform {
 
 provider "aws" {
   region = "us-east-2"
+}
+
+# for creating acm certificate via terraform
+# I created it manually
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
 }
