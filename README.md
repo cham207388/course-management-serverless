@@ -1,5 +1,13 @@
 # Course Management
 
+- [Course Management](#course-management)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+  - [DevOps](#devops)
+    - [Terraform](#terraform)
+    - [GitHub Actions](#github-actions)
+
+
 Course management allows users to management the courses they want to enroll in.
 
 ## Backend

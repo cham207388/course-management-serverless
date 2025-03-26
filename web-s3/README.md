@@ -1,5 +1,17 @@
 # 🎓 Course Management - React Frontend
 
+- [🎓 Course Management - React Frontend](#-course-management---react-frontend)
+  - [🌐 Live URL](#-live-url)
+  - [🧾 Features](#-features)
+  - [🚀 Project Structure](#-project-structure)
+    - [What's done](#whats-done)
+    - [Tech Stack](#tech-stack)
+    - [Setup \& Development](#setup--development)
+    - [Production Build](#production-build)
+    - [Automated using](#automated-using)
+  - [Resource React + Vite](#resource-react--vite)
+
+
 This is the frontend for the Course Management Serverless App, built with **React + Vite** and deployed via **S3 + CloudFront** for high availability and performance.
 
 ---
