@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://coursebe.alhagiebaicham.com/api/v1"; //http://localhost:8000
+const API_BASE_URL = "https://coursebe.alhagiebaicham.com/api/v2"; //http://localhost:8000
 
 const api = axios.create({
   baseURL: API_BASE_URL,
