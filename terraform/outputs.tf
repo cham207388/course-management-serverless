@@ -19,3 +19,7 @@ output "frontend_bucket" {
 output "cloudfront_distribution_id" {
   value = aws_cloudfront_distribution.frontend_cdn.id
 }
+
+output "cognito_user_pool_client_id" {
+  value = module.cognito.output.cognito_user_pool_client_id
+}

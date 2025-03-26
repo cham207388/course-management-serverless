@@ -14,6 +14,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.6",
     "@mui/material": "^6.4.6",
+    "amazon-cognito-identity-js": "^6.3.12",
     "axios": "^1.8.1",
     "dayjs": "^1.11.13",
     "react": "^19.0.0",
