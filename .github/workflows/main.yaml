@@ -29,7 +29,7 @@ jobs:
           directory: ./terraform
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: 'us-east-2'
           variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }},domain_name=${{ secrets.DOMAIN_NAME }}"
           
       - name: Save Terraform Outputs
@@ -55,6 +55,6 @@ jobs:
         env:
           DISTRIBUTION: ${{ env.CLOUDFRONT_DIST_ID }}
           PATHS: "/*"
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_REGION: 'us-east-2'
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
