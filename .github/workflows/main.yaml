@@ -17,6 +17,7 @@ jobs:
         uses: cham207388/github-custom-actions/mvn-jdk21@main
         with:
           directory: ./backend-ald
+          test: 'no'
 
       - name: Deploy Lambda
         uses: cham207388/github-custom-actions/tf-no-ssh@main
