@@ -6,7 +6,7 @@ import Course from "./pages/Course";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import SignUp from "./pages/SignUp";
 import PrivateRoute from "./components/PrivateRoute";
 
 const router = createBrowserRouter([
@@ -16,7 +16,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: 'login', element: <Login /> },
-      { path: 'signup', element: <Signup /> },
+      { path: 'signup', element: <SignUp /> },
 
       {
         path: 'courses',
