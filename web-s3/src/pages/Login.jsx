@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   TextField, Button, Typography, Box
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import  useAuth  from "../context/useAuth";
 
 const Login = () => {

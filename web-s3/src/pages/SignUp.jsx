@@ -3,7 +3,7 @@ import {
   TextField, Button, Typography, Box
 } from "@mui/material";
 import AuthService from "../auth/AuthService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Signup = () => {
   const [form, setForm] = useState({ email: "", password: "" });
