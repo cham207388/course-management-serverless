@@ -6,6 +6,7 @@
   - [DevOps](#devops)
     - [Terraform](#terraform)
     - [GitHub Actions](#github-actions)
+  - [Resources](#resources)
 
 
 Course management allows users to management the courses they want to enroll in.
@@ -52,3 +53,7 @@ There are two workflows
   - deploys the application
 - destroy
   - destroys the infrastructure
+
+## Resources
+
+- [temporary email](https://temp-mail.org/)
