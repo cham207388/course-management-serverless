@@ -36,7 +36,7 @@ jobs:
           echo "CLOUDFRONT_DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
           echo "COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_ENV
           echo "COGNITO_CLIENT_ID=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_ENV
-          echo "COGNITO_REGION=$(terraform output -raw cognito_region)" >> $GITHUB_ENV
+          echo "COGNITO_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
           echo "COGNITO_DOMAIN_URL=$(terraform output -raw cognito_domain_url)" >> $GITHUB_ENV
           echo "COGNITO_ISSUER_URL=$(terraform output -raw cognito_authorizer_issuer_url)" >> $GITHUB_ENV
           
