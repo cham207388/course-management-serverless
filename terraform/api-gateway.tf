@@ -1,8 +1,11 @@
-resource "aws_api_gateway_rest_api" "course_management" {
+# ───────────────────────────────────────────────
+# 🛠 API Gateway: REST API + Lambda Proxy + Cognito Auth
+# ───────────────────────────────────────────────
+
+resource "aws_api_gateway_rest_api" "course_api" {
   name        = "course-management"
   description = "REST API for Spring Boot Lambda"
 
-  # meant to resolve swagger
   binary_media_types = [
     "application/octet-stream",
     "application/javascript",
@@ -18,29 +21,30 @@ resource "aws_api_gateway_rest_api" "course_management" {
 }
 
 resource "aws_api_gateway_resource" "proxy" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  parent_id   = aws_api_gateway_rest_api.course_management.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.course_api.id
+  parent_id   = aws_api_gateway_rest_api.course_api.root_resource_id
   path_part   = "{proxy+}"
 }
 
-resource "aws_api_gateway_method" "any_method" {
-  rest_api_id   = aws_api_gateway_rest_api.course_management.id
+resource "aws_api_gateway_method" "proxy_method" {
+  rest_api_id   = aws_api_gateway_rest_api.course_api.id
   resource_id   = aws_api_gateway_resource.proxy.id
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
 }
 
-resource "aws_api_gateway_integration" "lambda_proxy" {
-  rest_api_id             = aws_api_gateway_rest_api.course_management.id
+resource "aws_api_gateway_integration" "lambda_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.course_api.id
   resource_id             = aws_api_gateway_resource.proxy.id
-  http_method             = aws_api_gateway_method.any_method.http_method
+  http_method             = aws_api_gateway_method.proxy_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
-resource "aws_api_gateway_deployment" "api_deployment" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
+resource "aws_api_gateway_deployment" "deployment" {
+  rest_api_id = aws_api_gateway_rest_api.course_api.id
 
   triggers = {
     redeployment = sha1(jsonencode({
@@ -52,18 +56,21 @@ resource "aws_api_gateway_deployment" "api_deployment" {
     create_before_destroy = true
   }
 
-  depends_on = [aws_api_gateway_integration.lambda_proxy]
+  depends_on = [aws_api_gateway_integration.lambda_integration]
 }
 
-resource "aws_api_gateway_stage" "dev_stage" {
-  deployment_id = aws_api_gateway_deployment.api_deployment.id
-  rest_api_id   = aws_api_gateway_rest_api.course_management.id
+resource "aws_api_gateway_stage" "dev" {
+  deployment_id = aws_api_gateway_deployment.deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.course_api.id
   stage_name    = "dev"
   description   = "Development stage"
 }
 
-# custom domain and mapping
-resource "aws_api_gateway_domain_name" "custom_domain" {
+# ───────────────────────────────────────────────
+# 🌐 Custom Domain for API Gateway
+# ───────────────────────────────────────────────
+
+resource "aws_api_gateway_domain_name" "custom" {
   domain_name              = "coursebe.alhagiebaicham.com"
   regional_certificate_arn = var.acm_cert_arn_agw
 
@@ -73,7 +80,27 @@ resource "aws_api_gateway_domain_name" "custom_domain" {
 }
 
 resource "aws_api_gateway_base_path_mapping" "mapping" {
-  domain_name = aws_api_gateway_domain_name.custom_domain.domain_name
-  api_id      = aws_api_gateway_rest_api.course_management.id
-  stage_name  = aws_api_gateway_stage.dev_stage.stage_name
+  domain_name = aws_api_gateway_domain_name.custom.domain_name
+  api_id      = aws_api_gateway_rest_api.course_api.id
+  stage_name  = aws_api_gateway_stage.dev.stage_name
+}
+
+# ───────────────────────────────────────────────
+# 🔐 Cognito Authorizer for API Gateway
+# ───────────────────────────────────────────────
+
+resource "aws_api_gateway_authorizer" "cognito" {
+  name            = "course-cognito-authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.course_api.id
+  type            = "COGNITO_USER_POOLS"
+  identity_source = "method.request.header.Authorization"
+  provider_arns   = [aws_cognito_user_pool.course_users.arn]
+}
+
+# ───────────────────────────────────────────────
+# 📤 Output Custom Domain URL
+# ───────────────────────────────────────────────
+
+output "course_backend_url" {
+  value = "https://${aws_api_gateway_domain_name.custom.domain_name}"
 }

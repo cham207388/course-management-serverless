@@ -17,11 +17,6 @@ jobs:
         uses: cham207388/github-custom-actions/mvn-jdk21@main
         with:
           directory: ./backend-ald
-          
-      - name: Build frontend
-        uses: cham207388/github-custom-actions/vite-node@main
-        with:
-          directory: ./web-s3
 
       - name: Deploy Lambda
         uses: cham207388/github-custom-actions/tf-no-ssh@main
@@ -38,6 +33,24 @@ jobs:
           cd terraform
           echo "BUCKET_NAME=$(terraform output -raw frontend_bucket)" >> $GITHUB_ENV
           echo "CLOUDFRONT_DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
+          echo "COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_ENV
+          echo "COGNITO_CLIENT_ID=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_ENV
+          echo "COGNITO_REGION=$(terraform output -raw cognito_region)" >> $GITHUB_ENV
+          echo "COGNITO_DOMAIN_URL=$(terraform output -raw cognito_domain_url)" >> $GITHUB_ENV
+          echo "COGNITO_ISSUER_URL=$(terraform output -raw cognito_authorizer_issuer_url)" >> $GITHUB_ENV
+          
+      - name: 🔧 Inject Cognito Env Vars into React App
+        run: |
+          echo "VITE_COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID" > web-s3/.env
+          echo "VITE_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID" >> web-s3/.env
+          echo "VITE_COGNITO_REGION=$COGNITO_REGION" >> web-s3/.env
+          echo "VITE_COGNITO_DOMAIN_URL=$COGNITO_DOMAIN_URL" >> web-s3/.env
+          echo "VITE_COGNITO_ISSUER_URL=$COGNITO_ISSUER_URL" >> web-s3/.env
+                    
+      - name: Build frontend
+        uses: cham207388/github-custom-actions/vite-node@main
+        with:
+          directory: ./web-s3          
           
       - name: ☁️ Deploy to S3
         uses: jakejarvis/s3-sync-action@master
