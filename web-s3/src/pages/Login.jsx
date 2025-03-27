@@ -28,7 +28,7 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 5 }}>
+    <Box sx={{ maxWidth: 400, mx: "auto", mt: 4 }}>
       <Typography variant="h4" gutterBottom>Login</Typography>
       <form onSubmit={handleSubmit}>
         <TextField
@@ -56,7 +56,10 @@ const Login = () => {
           Login
         </Button>
       </form>
-    </Container>
+      <Typography sx={{ mt: 2 }}>
+        Don&apos;t have an account? <Link to="/signup">Sign Up</Link>
+      </Typography>
+    </Box>
   );
 };
 

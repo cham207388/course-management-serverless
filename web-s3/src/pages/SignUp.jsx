@@ -27,7 +27,7 @@ const Signup = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 5 }}>
+    <Box sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
       <Typography variant="h4" gutterBottom>Sign Up</Typography>
       <form onSubmit={handleSubmit}>
         <TextField
@@ -55,7 +55,10 @@ const Signup = () => {
           Sign Up
         </Button>
       </form>
-    </Container>
+      <Typography>
+        Already have an account? <Link to="/login">Sign In</Link>
+      </Typography>
+    </Box>
   );
 };
 

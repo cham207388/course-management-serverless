@@ -87,7 +87,7 @@ spring-boot-lambda/
 
 ### 2️⃣ Lambda Configuration (Terraform)
 
-[Lambda Config](./terraform/lambda.tf)
+[Lambda Config](../terraform/lambda.tf)
 
 #### ✅ Lambda uses:
 
@@ -96,7 +96,7 @@ spring-boot-lambda/
 
 ### 3️⃣ API Gateway (Terraform)
 
-[Api Gateway](./terraform/api-gateway.tf)
+[Api Gateway](../terraform/api-gateway.tf)
 
 | Task                            | Description                         |
 |---------------------------------|-------------------------------------|
@@ -113,7 +113,7 @@ spring-boot-lambda/
 
 ### 4️⃣ DynamoDB Table (Terraform)
 
-[DynamoDB Table](./terraform/dynamodb.tf)
+[DynamoDB Table](../terraform/dynamodb.tf)
 
 | Attribute | Type   | Key Type      |
 |-----------|--------|---------------|
@@ -126,7 +126,7 @@ spring-boot-lambda/
 
 ### 5️⃣ IAM Role for Lambda (Terraform)
 
-[IAM Config](./terraform/iam-permissions.tf)
+[IAM Config](../terraform/iam-permissions.tf)
 
 - Least privilege policy for DynamoDB access
 - CloudWatch logging enabled
@@ -135,7 +135,7 @@ spring-boot-lambda/
 
 ACM cert must be in us-east-1, even if your API is in another region.
 
-[ACM in us-east-1](./terraform/acm.tf)
+[ACM in us-east-1](../terraform/acm.tf)
 
 | Step                              | Description                                               |
 |-----------------------------------|-----------------------------------------------------------|
@@ -145,7 +145,7 @@ ACM cert must be in us-east-1, even if your API is in another region.
 
 ### 7️⃣ Route53 + Custom Domain Mapping
 
-[Route53](./terraform/route53.tf)
+[Route53](../terraform/route53.tf)
 
 | Task                                     | Description                                     |
 |------------------------------------------|-------------------------------------------------|
