@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthContext from "./AuthContext";
-import AuthService from "../services/AuthService";
+import AuthService from "../auth/AuthService"
 
 const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({ user: null, token: null, loading: true });
