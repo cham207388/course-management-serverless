@@ -55,7 +55,7 @@ const Signup = () => {
           Sign Up
         </Button>
       </form>
-      <Typography>
+      <Typography sx={{ mt: 2 }}>
         Already have an account? <Link to="/login">Sign In</Link>
       </Typography>
     </Box>
