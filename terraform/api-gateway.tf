@@ -64,6 +64,8 @@ resource "aws_api_gateway_stage" "dev" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   stage_name    = "dev"
   description   = "Development stage"
+  # Prevent deletion before base path mapping is gone
+  depends_on = [aws_api_gateway_base_path_mapping.mapping]
 }
 
 # ───────────────────────────────────────────────
