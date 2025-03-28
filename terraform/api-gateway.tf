@@ -65,7 +65,7 @@ resource "aws_api_gateway_stage" "dev" {
   stage_name    = "dev"
   description   = "Development stage"
   # Prevent deletion before base path mapping is gone
-  depends_on = [aws_api_gateway_base_path_mapping.mapping]
+  # depends_on = [aws_api_gateway_base_path_mapping.mapping]
 }
 
 # ───────────────────────────────────────────────
