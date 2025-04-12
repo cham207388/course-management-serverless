@@ -3,6 +3,7 @@
 - [🎓 Course Management - React Frontend](#-course-management---react-frontend)
   - [🌐 Live URL](#-live-url)
   - [🧾 Features](#-features)
+  - [Authentication and Authorization with Cognito User](#authentication-and-authorization-with-cognito-user)
   - [🚀 Project Structure](#-project-structure)
     - [What's done](#whats-done)
     - [Tech Stack](#tech-stack)
@@ -33,6 +34,9 @@ Access the deployed app here:
 - Environment-based configuration
 - GitHub Actions CI/CD ready
 
+---
+
+## Authentication and Authorization with Cognito User
 ---
 
 ## 🚀 Project Structure
