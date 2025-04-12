@@ -15,11 +15,6 @@ jobs:
         with:
           directory: ./backend-ald
           test: 'no'
-          
-      # - name: Build frontend
-      #   uses: cham207388/github-custom-actions/vite-node@main
-      #   with:
-      #     directory: ./web-s3
 
       - name: Destroy Lambda
         uses: cham207388/github-custom-actions/tf-no-ssh@main
