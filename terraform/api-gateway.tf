@@ -157,4 +157,5 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://course.alhagiebaicham.com'"
   }
+  depends_on = [aws_api_gateway_integration.options_integration]
 }
