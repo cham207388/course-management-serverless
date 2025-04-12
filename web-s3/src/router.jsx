@@ -7,6 +7,7 @@ import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import ConfirmEmail from "./pages/ConfirmEmail";
 import PrivateRoute from "./components/PrivateRoute";
 
 const router = createBrowserRouter([
