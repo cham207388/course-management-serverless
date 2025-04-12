@@ -19,7 +19,7 @@ const Signup = () => {
     e.preventDefault();
     try {
       await AuthService.signUp(form.email, form.password);
-      navigate("/login"); // ✅ Redirect on success
+      navigate(`/confirm-email?email=${encodeURIComponent(form.email)}`);
     } catch (err) {
       setError("Signup failed. Maybe user already exists?");
       console.error(err);

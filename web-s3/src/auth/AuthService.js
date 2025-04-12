@@ -52,9 +52,19 @@ const getSession = () =>
     });
   });
 
+const confirmSignUp = (email, code) =>
+  new Promise((resolve, reject) => {
+    const user = new CognitoUser({ Username: email, Pool: userPool });
+    user.confirmRegistration(code, true, (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+
 export default {
   signUp,
   signIn,
   signOut,
   getSession,
+  confirmSignUp
 };
