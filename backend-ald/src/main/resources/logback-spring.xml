@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
+
+    <!-- Use defaultValue with proper syntax -->
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="spring-boot-lambda-default"/>
+    <springProperty scope="context" name="env" source="spring.profiles.active" defaultValue="default"/>
+
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"application":"${spring.application.name}","environment":"${spring.profiles.active:default}"}</customFields>
+<!--            <customFields>{"application":"${appName}","environment":"${env}"}</customFields>-->
             <timeZone>UTC</timeZone>
         </encoder>
     </appender>

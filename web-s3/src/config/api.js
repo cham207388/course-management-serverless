@@ -18,7 +18,6 @@ api.interceptors.request.use(async (config) => {
     const session = await AuthService.getSession();
     const token = session.getIdToken().getJwtToken();
     config.headers.Authorization = `Bearer ${token}`;
-    console.log("token", token);
   } catch (err) {
     console.warn("No session found, sending request without token", err);
   }

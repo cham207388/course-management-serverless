@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class SecurityService {
-  
+
     public String extractUsernameFromToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -17,7 +17,7 @@ public class SecurityService {
             DecodedJWT jwt = JWT.decode(token);
 
             // Standard claim from Cognito
-            return jwt.getClaim("cognito:username").asString();
+            return jwt.getClaim("email").asString();
         }
         return "anonymous";
     }

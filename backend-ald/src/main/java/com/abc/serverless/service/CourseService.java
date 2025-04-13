@@ -21,7 +21,7 @@ public class CourseService {
     private final DynamoDbTable<Course> courseTable;
 
     public void addCourse(Course course, String owner) {
-        log.info("Adding course request to DynamoDB: {}", course);
+        log.info("Adding course with id {} for {}", course.getId(), course.getOwner());
 
         course.setId(UUID.randomUUID().toString());
         course.setOwner(owner);
