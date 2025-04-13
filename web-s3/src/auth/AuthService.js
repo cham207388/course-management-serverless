@@ -30,6 +30,8 @@ const signIn = (email, password) =>
     user.authenticateUser(authDetails, {
       onSuccess: (result) => {
         const token = result.getIdToken().getJwtToken();
+        console.log("token", token);
+        localStorage.setItem("token", token);
         resolve({ token, user });
       },
       onFailure: (err) => reject(err),

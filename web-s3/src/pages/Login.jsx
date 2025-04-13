@@ -20,6 +20,7 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(form.email, form.password);
+      console.log("login successful");
       navigate("/courses");
     } catch (err) {
       setError("Login failed. Check credentials.");
