@@ -5,17 +5,52 @@ import Courses from "./pages/Courses";
 import Course from "./pages/Course";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import ConfirmEmail from "./pages/ConfirmEmail";
+import PrivateRoute from "./components/PrivateRoute";
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
     children: [
-      { index: true, element: <Home /> }, // ✅ Home as the default route
-      { path: 'courses', element: <Courses /> },
-      { path: 'courses/:id', element: <Course /> }, 
-      { path: 'add-course', element: <AddCourse /> },
-      { path: 'edit-course/:id', element: <EditCourse /> },
+      { index: true, element: <Home /> },
+      { path: 'login', element: <Login /> },
+      { path: 'signup', element: <SignUp /> },
+      { path: 'confirm-email', element: <ConfirmEmail /> },
+      {
+        path: 'courses',
+        element: (
+          <PrivateRoute>
+            <Courses />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'courses/:id',
+        element: (
+          <PrivateRoute>
+            <Course />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'add-course',
+        element: (
+          <PrivateRoute>
+            <AddCourse />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: 'edit-course/:id',
+        element: (
+          <PrivateRoute>
+            <EditCourse />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
 ]);
