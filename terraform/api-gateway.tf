@@ -48,7 +48,8 @@ resource "aws_api_gateway_deployment" "deployment" {
 
   triggers = {
     redeployment = sha1(jsonencode({
-      lambda_version = aws_lambda_function.course_management.source_code_hash
+      lambda_version = aws_lambda_function.course_management.source_code_hash,
+      cors_version   = "v2"
     }))
   }
 
@@ -143,6 +144,7 @@ resource "aws_api_gateway_method_response" "options_response" {
     "method.response.header.Access-Control-Allow-Headers" = true
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Credentials" = true
   }
 }
 
@@ -156,6 +158,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
   depends_on = [aws_api_gateway_integration.options_integration]
 }
