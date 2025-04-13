@@ -1,5 +1,13 @@
 # ───────────────────────────────────────────────
-# 🛠 API Gateway: REST API + Lambda Proxy + Cognito Auth
+# 🛠 API Gateway Configuration
+# ───────────────────────────────────────────────
+
+locals {
+  allowed_origin = "https://course.alhagiebaicham.com"
+}
+
+# ───────────────────────────────────────────────
+# API Gateway REST API
 # ───────────────────────────────────────────────
 
 resource "aws_api_gateway_rest_api" "course_management" {
@@ -27,15 +35,14 @@ resource "aws_api_gateway_method" "options_method" {
 }
 
 resource "aws_api_gateway_integration" "options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.options_method.http_method
-  type        = "MOCK"
+  rest_api_id          = aws_api_gateway_rest_api.course_management.id
+  resource_id          = aws_api_gateway_resource.proxy.id
+  http_method          = aws_api_gateway_method.options_method.http_method
+  type                 = "MOCK"
+  passthrough_behavior = "WHEN_NO_MATCH"
 
   request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
+    "application/json" = jsonencode({ statusCode = 200 })
   }
 }
 
@@ -45,16 +52,16 @@ resource "aws_api_gateway_method_response" "options_response" {
   http_method = aws_api_gateway_method.options_method.http_method
   status_code = "200"
 
-  response_models = {
-    "application/json" = "Empty"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers"     = true,
+    "method.response.header.Access-Control-Allow-Methods"     = true,
+    "method.response.header.Access-Control-Allow-Origin"      = true,
+    "method.response.header.Access-Control-Max-Age"           = true,
+    "method.response.header.Access-Control-Allow-Credentials" = true
   }
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = true
-    "method.response.header.Access-Control-Allow-Methods"     = true
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-    "method.response.header.Access-Control-Max-Age"           = true
+  response_models = {
+    "application/json" = "Empty"
   }
 }
 
@@ -65,11 +72,11 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
   status_code = aws_api_gateway_method_response.options_response.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'",
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'",
+    "method.response.header.Access-Control-Max-Age"           = "'7200'",
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
-    "method.response.header.Access-Control-Max-Age"           = "'3600'"
   }
 
   depends_on = [aws_api_gateway_integration.options_integration]
@@ -104,55 +111,7 @@ resource "aws_api_gateway_method_response" "proxy_response_200" {
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-}
-
-resource "aws_api_gateway_method_response" "proxy_response_400" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.proxy_method.http_method
-  status_code = "400"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-}
-
-resource "aws_api_gateway_method_response" "proxy_response_401" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.proxy_method.http_method
-  status_code = "401"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-}
-
-resource "aws_api_gateway_method_response" "proxy_response_403" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.proxy_method.http_method
-  status_code = "403"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
-    "method.response.header.Access-Control-Allow-Credentials" = true
-  }
-}
-
-resource "aws_api_gateway_method_response" "proxy_response_404" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.proxy_method.http_method
-  status_code = "404"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = true
+    "method.response.header.Access-Control-Allow-Origin"      = true,
     "method.response.header.Access-Control-Allow-Credentials" = true
   }
 }
@@ -164,7 +123,7 @@ resource "aws_api_gateway_integration_response" "proxy_integration_response" {
   status_code = aws_api_gateway_method_response.proxy_response_200.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'",
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
@@ -205,15 +164,11 @@ resource "aws_api_gateway_deployment" "deployment" {
 
   depends_on = [
     aws_api_gateway_integration.lambda_integration,
-    aws_api_gateway_method.options_method,
     aws_api_gateway_integration.options_integration,
     aws_api_gateway_method_response.options_response,
     aws_api_gateway_integration_response.options_integration_response,
     aws_api_gateway_method_response.proxy_response_200,
-    aws_api_gateway_method_response.proxy_response_400,
-    aws_api_gateway_method_response.proxy_response_401,
-    aws_api_gateway_method_response.proxy_response_403,
-    aws_api_gateway_method_response.proxy_response_404
+    aws_api_gateway_integration_response.proxy_integration_response
   ]
 }
 
@@ -226,15 +181,13 @@ resource "aws_api_gateway_stage" "dev" {
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gw_logs.arn
     format = jsonencode({
-      requestId      = "$context.requestId"
-      ip             = "$context.identity.sourceIp"
-      caller         = "$context.identity.caller"
-      user           = "$context.identity.user"
-      requestTime    = "$context.requestTime"
-      httpMethod     = "$context.httpMethod"
-      resourcePath   = "$context.resourcePath"
-      status         = "$context.status"
-      protocol       = "$context.protocol"
+      requestId      = "$context.requestId",
+      ip             = "$context.identity.sourceIp",
+      requestTime    = "$context.requestTime",
+      httpMethod     = "$context.httpMethod",
+      resourcePath   = "$context.resourcePath",
+      status         = "$context.status",
+      protocol       = "$context.protocol",
       responseLength = "$context.responseLength"
     })
   }
@@ -260,7 +213,7 @@ resource "aws_api_gateway_base_path_mapping" "mapping" {
 }
 
 # ───────────────────────────────────────────────
-# CloudWatch Logs for API Gateway
+# CloudWatch Logs Configuration
 # ───────────────────────────────────────────────
 
 resource "aws_cloudwatch_log_group" "api_gw_logs" {
