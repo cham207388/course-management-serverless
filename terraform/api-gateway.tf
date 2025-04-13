@@ -6,26 +6,18 @@ resource "aws_api_gateway_rest_api" "course_management" {
   name        = "course-management"
   description = "REST API for Spring Boot Lambda"
 
-  binary_media_types = [
-    "application/octet-stream",
-    "application/javascript",
-    "application/json",
-    "application/xml",
-    "text/html",
-    "text/css",
-    "text/plain",
-    "image/png",
-    "image/jpeg",
-    "*/*"
-  ]
+  # Allows binary & wide range of media types
+  binary_media_types = ["*/*"]
 }
 
+# {proxy+} catch-all route
 resource "aws_api_gateway_resource" "proxy" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   parent_id   = aws_api_gateway_rest_api.course_management.root_resource_id
   path_part   = "{proxy+}"
 }
 
+# ANY method with Cognito Authorizer
 resource "aws_api_gateway_method" "proxy_method" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -43,13 +35,14 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
+# Deployment
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
 
   triggers = {
     redeployment = sha1(jsonencode({
       lambda_version = aws_lambda_function.course_management.source_code_hash,
-      cors_version   = "v2"
+      cors_version   = "v4"
     }))
   }
 
@@ -65,8 +58,6 @@ resource "aws_api_gateway_stage" "dev" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   stage_name    = "dev"
   description   = "Development stage"
-  # Prevent deletion before base path mapping is gone
-  # depends_on = [aws_api_gateway_base_path_mapping.mapping]
 }
 
 # ───────────────────────────────────────────────
@@ -89,7 +80,7 @@ resource "aws_api_gateway_base_path_mapping" "mapping" {
 }
 
 # ───────────────────────────────────────────────
-# 🔐 Cognito Authorizer for API Gateway
+# 🔐 Cognito Authorizer
 # ───────────────────────────────────────────────
 
 resource "aws_api_gateway_authorizer" "cognito" {
@@ -101,12 +92,8 @@ resource "aws_api_gateway_authorizer" "cognito" {
 }
 
 # ───────────────────────────────────────────────
-# 📤 Output Custom Domain URL
+# ☁️ OPTIONS Method for CORS Preflight
 # ───────────────────────────────────────────────
-
-output "course_backend_url" {
-  value = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}"
-}
 
 resource "aws_api_gateway_method" "options_method" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
@@ -141,9 +128,9 @@ resource "aws_api_gateway_method_response" "options_response" {
   }
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Headers"     = true
+    "method.response.header.Access-Control-Allow-Methods"     = true
+    "method.response.header.Access-Control-Allow-Origin"      = true
     "method.response.header.Access-Control-Allow-Credentials" = true
   }
 }
@@ -155,10 +142,11 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"  = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
+
   depends_on = [aws_api_gateway_integration.options_integration]
 }

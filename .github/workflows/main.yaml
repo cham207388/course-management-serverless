@@ -28,10 +28,14 @@ jobs:
           aws-region: "us-east-2"
           variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }},acm_cert_arn_agw=${{ secrets.ACM_CERT_ARN_AGW }},domain_name=${{ secrets.DOMAIN_NAME }}"
           
-      - name: Save Terraform Outputs
+      - name: ✅ Save Terraform Outputs
         id: tf_outputs
         run: |
+          set -euo pipefail
           cd terraform
+
+          echo "📦 Extracting Terraform Outputs..."
+
           echo "BUCKET_NAME=$(terraform output -raw frontend_bucket)" >> $GITHUB_ENV
           echo "CLOUDFRONT_DIST_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
           echo "COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_ENV
@@ -39,14 +43,23 @@ jobs:
           echo "COGNITO_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
           echo "COGNITO_DOMAIN_URL=$(terraform output -raw cognito_domain_url)" >> $GITHUB_ENV
           echo "COGNITO_ISSUER_URL=$(terraform output -raw cognito_authorizer_issuer_url)" >> $GITHUB_ENV
-          
-      - name: 🔧 Inject Cognito Env Vars into React App
+          echo "API_URL=$(terraform output -raw course_backend_url)/api/v2" >> $GITHUB_ENV
+
+          echo "✅ Terraform outputs saved to GITHUB_ENV"
+
+      - name: 🔧 Inject Cognito & API Env Vars into React App
         run: |
-          echo "VITE_COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID" > web-s3/.env
-          echo "VITE_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID" >> web-s3/.env
-          echo "VITE_COGNITO_REGION=$COGNITO_REGION" >> web-s3/.env
-          echo "VITE_COGNITO_DOMAIN_URL=$COGNITO_DOMAIN_URL" >> web-s3/.env
-          echo "VITE_COGNITO_ISSUER_URL=$COGNITO_ISSUER_URL" >> web-s3/.env
+          echo "⚙️ Creating .env for Vite..."
+          cat <<EOF | tee web-s3/.env
+            VITE_COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID
+            VITE_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID
+            VITE_COGNITO_REGION=$COGNITO_REGION
+            VITE_COGNITO_DOMAIN_URL=$COGNITO_DOMAIN_URL
+            VITE_COGNITO_ISSUER_URL=$COGNITO_ISSUER_URL
+            VITE_API_URL=$API_URL
+            EOF
+
+          echo "✅ .env written with Cognito and API Gateway values"
                     
       - name: Build frontend
         uses: cham207388/github-custom-actions/vite-node@main

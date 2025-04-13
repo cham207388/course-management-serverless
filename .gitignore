@@ -100,6 +100,7 @@ Thumbs.db
 # terraform
 .terraform
 .terraform.lock.hcl
+**/*.tfvars
 
 # virtual env
 .venv

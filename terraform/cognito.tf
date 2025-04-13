@@ -3,8 +3,7 @@ resource "random_id" "suffix" {
 }
 
 resource "aws_cognito_user_pool" "course_user_pool" {
-  name = "course-user-pool"
-
+  name                     = "course-user-pool"
   auto_verified_attributes = ["email"]
   username_attributes      = ["email"]
 
