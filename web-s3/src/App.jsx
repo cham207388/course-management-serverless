@@ -114,12 +114,6 @@ function App() {
                 Course Management
               </Typography>
               <Box>
-                <Button color="inherit" component={Link} to="/courses">
-                  Courses
-                </Button>
-                <Button color="inherit" component={Link} to="/add-course">
-                  Add Course
-                </Button>
 
                 {!user ? (
                   <>
@@ -131,9 +125,17 @@ function App() {
                     </Button>
                   </>
                 ) : (
+                  <>
+                  <Button color="inherit" component={Link} to="/courses">
+                    Courses
+                  </Button>
+                  <Button color="inherit" component={Link} to="/add-course">
+                    Add Course
+                  </Button>
                   <Button color="inherit" onClick={handleLogout}>
                     Logout
                   </Button>
+                  </>
                 )}
               </Box>
             </>
