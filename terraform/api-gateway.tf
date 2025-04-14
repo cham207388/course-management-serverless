@@ -23,10 +23,9 @@ resource "aws_api_gateway_resource" "proxy" {
 }
 
 # ───────────────────────────────────────────────
-# CORS Configuration
+# CORS Configuration (Fixed)
 # ───────────────────────────────────────────────
 
-# OPTIONS Method for CORS Preflight
 resource "aws_api_gateway_method" "options_method" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -39,10 +38,12 @@ resource "aws_api_gateway_integration" "options_integration" {
   resource_id          = aws_api_gateway_resource.proxy.id
   http_method          = aws_api_gateway_method.options_method.http_method
   type                 = "MOCK"
-  passthrough_behavior = "WHEN_NO_MATCH"
+  passthrough_behavior = "NEVER" # This fixes the 500 error
 
   request_templates = {
-    "application/json" = jsonencode({ statusCode = 200 })
+    "application/json" = jsonencode({
+      statusCode = 200
+    })
   }
 }
 
@@ -79,6 +80,11 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
+  # Required empty response template
+  response_templates = {
+    "application/json" = jsonencode({})
+  }
+
   depends_on = [aws_api_gateway_integration.options_integration]
 }
 
@@ -103,7 +109,6 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
-# Add CORS headers to proxy method responses
 resource "aws_api_gateway_method_response" "proxy_response_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
@@ -154,7 +159,9 @@ resource "aws_api_gateway_deployment" "deployment" {
       aws_api_gateway_integration.lambda_integration,
       aws_api_gateway_integration.options_integration,
       aws_api_gateway_method.proxy_method,
-      aws_api_gateway_method.options_method
+      aws_api_gateway_method.options_method,
+      aws_api_gateway_integration_response.options_integration_response,
+      aws_api_gateway_integration_response.proxy_integration_response
     ]))
   }
 
@@ -168,7 +175,8 @@ resource "aws_api_gateway_deployment" "deployment" {
     aws_api_gateway_method_response.options_response,
     aws_api_gateway_integration_response.options_integration_response,
     aws_api_gateway_method_response.proxy_response_200,
-    aws_api_gateway_integration_response.proxy_integration_response
+    aws_api_gateway_integration_response.proxy_integration_response,
+    aws_api_gateway_authorizer.cognito
   ]
 }
 
