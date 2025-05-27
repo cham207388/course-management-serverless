@@ -2,7 +2,7 @@
 import axios from "axios";
 import AuthService from "../auth/AuthService";
 
-const API_BASE_URL = "https://coursebe.alhagiebaicham.com";
+const API_BASE_URL = "https://api.alhagiebaicham.com";
 
 const api = axios.create({
   baseURL: API_BASE_URL,

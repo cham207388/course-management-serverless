@@ -1,5 +1,7 @@
 variable "aws_region" {
-  default = "us-east-1"
+  description = "AWS region to deploy resources"
+  type        = string
+  default     = "us-east-1"
 }
 
 variable "domain_name" {
@@ -8,11 +10,12 @@ variable "domain_name" {
 }
 
 variable "frontend_url" {
-  default = "course.alhagiebaicham.com"
+  description = "Frontend domain name"
+  default     = "course.alhagiebaicham.com"
 }
 
 variable "api_domain_name" {
   description = "The domain name for the API Gateway"
   type        = string
-  default     = "coursebe.alhagiebaicham.com"
+  default     = "api.alhagiebaicham.com"
 }

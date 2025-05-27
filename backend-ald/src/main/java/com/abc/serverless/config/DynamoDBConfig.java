@@ -16,7 +16,7 @@ public class DynamoDBConfig {
     @Bean
     public DynamoDbClient dynamoDbClient() {
         return DynamoDbClient.builder()
-                .region(Region.of(System.getenv().getOrDefault("AWS_REGION", "us-east-2")))
+                .region(Region.of(System.getenv().getOrDefault("AWS_REGION", "us-east-1")))
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
     }
