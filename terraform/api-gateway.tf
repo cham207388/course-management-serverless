@@ -33,12 +33,14 @@ resource "aws_api_gateway_integration" "options_proxy" {
   request_templates = {
     "application/json" = jsonencode({ statusCode = 200 })
   }
+
+  depends_on = [aws_api_gateway_method.options_proxy]
 }
 
 resource "aws_api_gateway_method_response" "options_proxy" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
-  http_method = "OPTIONS"
+  http_method = aws_api_gateway_method.options_proxy.http_method
   status_code = "200"
 
   response_parameters = {
@@ -51,21 +53,6 @@ resource "aws_api_gateway_method_response" "options_proxy" {
 
   response_models = {
     "application/json" = "Empty"
-  }
-}
-
-resource "aws_api_gateway_integration_response" "options_proxy" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_resource.proxy.id
-  http_method = aws_api_gateway_method.options_proxy.http_method
-  status_code = aws_api_gateway_method_response.options_proxy.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept,Origin,X-Requested-With'",
-    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE,PATCH'",
-    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'",
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'",
-    "method.response.header.Access-Control-Max-Age"           = "'3600'"
   }
 
   depends_on = [aws_api_gateway_integration.options_proxy]
@@ -89,12 +76,14 @@ resource "aws_api_gateway_integration" "options_root" {
   request_templates = {
     "application/json" = jsonencode({ statusCode = 200 })
   }
+
+  depends_on = [aws_api_gateway_method.options_root]
 }
 
 resource "aws_api_gateway_method_response" "options_root" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_rest_api.course_management.root_resource_id
-  http_method = "OPTIONS"
+  http_method = aws_api_gateway_method.options_root.http_method
   status_code = "200"
 
   response_parameters = {
@@ -107,21 +96,6 @@ resource "aws_api_gateway_method_response" "options_root" {
 
   response_models = {
     "application/json" = "Empty"
-  }
-}
-
-resource "aws_api_gateway_integration_response" "options_root" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-  resource_id = aws_api_gateway_rest_api.course_management.root_resource_id
-  http_method = aws_api_gateway_method.options_root.http_method
-  status_code = aws_api_gateway_method_response.options_root.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept,Origin,X-Requested-With'",
-    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE,PATCH'",
-    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'",
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'",
-    "method.response.header.Access-Control-Max-Age"           = "'3600'"
   }
 
   depends_on = [aws_api_gateway_integration.options_root]
@@ -186,16 +160,60 @@ resource "aws_api_gateway_stage" "dev" {
 
 # 🌍 Custom Domain
 resource "aws_api_gateway_domain_name" "custom_domain" {
-  domain_name              = "coursebe.alhagiebaicham.com"
-  regional_certificate_arn = var.acm_cert_arn_agw
+  domain_name              = var.api_domain_name
+  regional_certificate_arn = aws_acm_certificate.api.arn
 
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  depends_on = [aws_acm_certificate_validation.api]
 }
 
 resource "aws_api_gateway_base_path_mapping" "mapping" {
   domain_name = aws_api_gateway_domain_name.custom_domain.domain_name
   api_id      = aws_api_gateway_rest_api.course_management.id
   stage_name  = aws_api_gateway_stage.dev.stage_name
+}
+
+# Certificate for frontend domain
+resource "aws_acm_certificate" "frontend" {
+  domain_name       = var.frontend_url
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "frontend" {
+  certificate_arn         = aws_acm_certificate.frontend.arn
+  validation_record_fqdns = [for record in aws_acm_certificate.frontend.domain_validation_options : record.resource_record_name]
+}
+
+# Certificate for API Gateway
+resource "aws_acm_certificate" "api" {
+  domain_name       = var.api_domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "api" {
+  certificate_arn         = aws_acm_certificate.api.arn
+  validation_record_fqdns = [for record in aws_acm_certificate.api.domain_validation_options : record.resource_record_name]
+}
+
+# Custom domain name for API Gateway
+resource "aws_api_gateway_domain_name" "api" {
+  domain_name              = var.api_domain_name
+  regional_certificate_arn = aws_acm_certificate.api.arn
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  depends_on = [aws_acm_certificate_validation.api]
 }
