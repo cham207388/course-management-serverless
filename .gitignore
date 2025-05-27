@@ -104,3 +104,4 @@ Thumbs.db
 
 # virtual env
 .venv
+terraform/terraform.tfvars
