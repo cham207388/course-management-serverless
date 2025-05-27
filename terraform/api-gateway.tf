@@ -61,7 +61,7 @@ resource "aws_api_gateway_integration_response" "options_proxy" {
   status_code = aws_api_gateway_method_response.options_proxy.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept,Origin,X-Requested-With'",
     "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE,PATCH'",
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'",
     "method.response.header.Access-Control-Allow-Credentials" = "'true'",
@@ -94,7 +94,7 @@ resource "aws_api_gateway_integration" "options_root" {
 resource "aws_api_gateway_method_response" "options_root" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_rest_api.course_management.root_resource_id
-  http_method = aws_api_gateway_method.options_root.http_method
+  http_method = "OPTIONS"
   status_code = "200"
 
   response_parameters = {
@@ -117,7 +117,7 @@ resource "aws_api_gateway_integration_response" "options_root" {
   status_code = aws_api_gateway_method_response.options_root.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Accept,Origin,X-Requested-With'",
     "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE,PATCH'",
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'",
     "method.response.header.Access-Control-Allow-Credentials" = "'true'",

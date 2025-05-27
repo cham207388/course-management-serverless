@@ -2,12 +2,13 @@
 import axios from "axios";
 import AuthService from "../auth/AuthService";
 
-const API_BASE_URL = "https://coursebe.alhagiebaicham.com/api/v2";
+const API_BASE_URL = "https://coursebe.alhagiebaicham.com";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    "Accept": "application/json"
   },
   withCredentials: true
 });
@@ -23,5 +24,22 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+// Add response interceptor to handle CORS errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      console.error("API Error:", error.response.data);
+      console.error("Status:", error.response.status);
+      console.error("Headers:", error.response.headers);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
