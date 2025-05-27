@@ -205,15 +205,3 @@ resource "aws_acm_certificate_validation" "api" {
   certificate_arn         = aws_acm_certificate.api.arn
   validation_record_fqdns = [for record in aws_acm_certificate.api.domain_validation_options : record.resource_record_name]
 }
-
-# Custom domain name for API Gateway
-resource "aws_api_gateway_domain_name" "api" {
-  domain_name              = var.api_domain_name
-  regional_certificate_arn = aws_acm_certificate.api.arn
-
-  endpoint_configuration {
-    types = ["REGIONAL"]
-  }
-
-  depends_on = [aws_acm_certificate_validation.api]
-}
