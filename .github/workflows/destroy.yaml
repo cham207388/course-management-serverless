@@ -14,11 +14,7 @@ jobs:
         uses: cham207388/github-custom-actions/mvn-jdk21@main
         with:
           directory: ./backend-ald
-          
-      - name: Build frontend
-        uses: cham207388/github-custom-actions/vite-node@main
-        with:
-          directory: ./web-s3
+          test: 'no'
 
       - name: Destroy Lambda
         uses: cham207388/github-custom-actions/tf-no-ssh@main
@@ -26,6 +22,6 @@ jobs:
           directory: ./terraform
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          variables: "acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }},acm_cert_arn_agw=${{ secrets.ACM_CERT_ARN_AGW }},domain_name=${{ secrets.DOMAIN_NAME }}"
+          aws-region: "us-east-1"
+          variables: "domain_name=${{ secrets.DOMAIN_NAME }}"
           destroy: "yes"

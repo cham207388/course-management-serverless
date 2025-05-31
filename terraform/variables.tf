@@ -1,21 +1,21 @@
 variable "aws_region" {
-  default = "us-east-2"
-}
-
-variable "acm_certificate_arn" {
-  description = "The ACM certificate ARN for custom domain in us-east-1"
+  description = "AWS region to deploy resources"
   type        = string
-}
-
-variable "acm_cert_arn_agw" {
-  description = "The ACM certificate ARN for api gateway"
-  type        = string
+  default     = "us-east-1"
 }
 
 variable "domain_name" {
   description = "domain name"
+  default     = "alhagiebaicham.com"
 }
 
 variable "frontend_url" {
-  default = "course.alhagiebaicham.com"
+  description = "Frontend domain name"
+  default     = "course.alhagiebaicham.com"
+}
+
+variable "api_domain_name" {
+  description = "The domain name for the API Gateway"
+  type        = string
+  default     = "api.alhagiebaicham.com"
 }

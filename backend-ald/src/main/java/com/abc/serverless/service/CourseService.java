@@ -20,41 +20,49 @@ public class CourseService {
 
     private final DynamoDbTable<Course> courseTable;
 
-    public void addCourse(Course course) {
-        log.info("Adding course request to DynamoDB: {}", course);
+    public void addCourse(Course course, String owner) {
+        log.info("Adding course with id {} for {}", course.getId(), course.getOwner());
 
         course.setId(UUID.randomUUID().toString());
+        course.setOwner(owner);
         log.info("Course entity saved to DynamoDB");
         courseTable.putItem(course);
     }
 
-    public List<Course> getAllCourses() {
+    public List<Course> getAllCourses(String owner) {
         log.info("Getting all courses from DynamoDB");
         return courseTable.scan()
                 .items()
                 .stream()
+                .filter(course -> owner.equals(course.getOwner()))
                 .toList();
     }
 
-    public Optional<Course> getCourseById(String id) {
+    public Optional<Course> getCourseById(String id, String owner) {
         log.info("Getting course with ID {} from DynamoDB", id);
-        return Optional.ofNullable(courseTable.getItem(r -> r.key(k -> k.partitionValue(id))));
+        Course course = courseTable.getItem(r -> r.key(k -> k.partitionValue(id)));
+        return (course != null && owner.equals(course.getOwner()))
+                ? Optional.of(course)
+                : Optional.empty();
     }
 
-    public boolean updateCourse(String id, Course newCourse) {
+    public boolean updateCourse(Course newCourse,String id, String owner) {
         log.info("Updating course with ID {} from DynamoDB", id);
         Course existing = courseTable.getItem(r -> r.key(k -> k.partitionValue(id)));
-        if (existing == null) return false;
+        if (existing == null || !owner.equals(existing.getOwner()))
+            return false;
 
         newCourse.setId(id);
+        newCourse.setOwner(owner);
         courseTable.putItem(newCourse);
         return true;
     }
 
-    public boolean deleteCourse(String id) {
+    public boolean deleteCourse(String id, String owner) {
         log.info("Deleting course with ID {} from DynamoDB", id);
         Course existing = courseTable.getItem(r -> r.key(k -> k.partitionValue(id)));
-        if (existing == null) return false;
+        if (existing == null || !owner.equals(existing.getOwner()))
+            return false;
 
         courseTable.deleteItem(existing);
         return true;

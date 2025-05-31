@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.abc.serverless.dto.Course;
+import com.abc.serverless.security.SecurityService;
 import com.abc.serverless.service.CourseService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,43 +27,50 @@ import lombok.RequiredArgsConstructor;
 public class CourseController {
 
     private final CourseService courseService;
+    private final SecurityService securityService;
 
 
     @PostMapping(produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Course> addCourse(@RequestBody Course course) {
-        courseService.addCourse(course);
+    public ResponseEntity<Course> addCourse(@RequestBody Course course, HttpServletRequest request) {
+        String username = securityService.extractUsernameFromToken(request);
+        courseService.addCourse(course, username);
         return new ResponseEntity<>(course, HttpStatus.CREATED);
     }
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<List<Course>> getAllCourses() {
-        List<Course> courses = courseService.getAllCourses();
+    public ResponseEntity<List<Course>> getAllCourses(HttpServletRequest request) {
+        String username = securityService.extractUsernameFromToken(request);
+        List<Course> courses = courseService.getAllCourses(username);
         return new ResponseEntity<>(courses, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Course> getCourseById(@PathVariable String id) {
-        Optional<Course> course = courseService.getCourseById(id);
+    public ResponseEntity<Course> getCourseById(@PathVariable String id, HttpServletRequest request) {
+        String username = securityService.extractUsernameFromToken(request);
+        Optional<Course> course = courseService.getCourseById(id, username);
         return course.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping(value = "/name/{name}", produces = "application/json")
-    public ResponseEntity<Course> getCourseByName(@PathVariable String name) {
-        Optional<Course> course = courseService.getCourseById(name);
+    public ResponseEntity<Course> getCourseByName(@PathVariable String name, HttpServletRequest request) {
+        String username = securityService.extractUsernameFromToken(request);
+        Optional<Course> course = courseService.getCourseById(name, username);
         return course.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping(value = "/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<Course> updateCourse(@PathVariable String id, @RequestBody Course updatedCourse) {
-        boolean updated = courseService.updateCourse(id, updatedCourse);
+    public ResponseEntity<Course> updateCourse(@RequestBody Course updatedCourse, @PathVariable String id, HttpServletRequest request) {
+        String username = securityService.extractUsernameFromToken(request);
+        boolean updated = courseService.updateCourse(updatedCourse, id, username);
         return updated ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
-        boolean deleted = courseService.deleteCourse(id);
+    public ResponseEntity<Void> deleteCourse(@PathVariable String id, HttpServletRequest request) {
+        String username = securityService.extractUsernameFromToken(request);
+        boolean deleted = courseService.deleteCourse(id, username);
         return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
