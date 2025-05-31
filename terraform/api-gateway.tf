@@ -1,5 +1,5 @@
 locals {
-  allowed_origin = "https://${var.frontend_url}"
+  allowed_origin = "https://course.alhagiebaicham.com"
 }
 
 resource "aws_api_gateway_rest_api" "course_management" {
@@ -179,7 +179,7 @@ resource "aws_api_gateway_method_response" "proxy_lambda" {
     "method.response.header.Access-Control-Allow-Credentials" = true
   }
 
-  depends_on = [aws_api_gateway_integration.proxy_lambda]
+  depends_on = [aws_api_gateway_method.proxy]
 }
 
 # 🔐 Cognito Authorizer
@@ -206,8 +206,9 @@ resource "aws_api_gateway_deployment" "deployment" {
       aws_api_gateway_integration_response.proxy_lambda,
       aws_api_gateway_integration_response.options_proxy,
       aws_api_gateway_integration_response.options_root,
-      aws_api_gateway_method_response.options_proxy,
-      aws_api_gateway_method_response.options_root
+      aws_api_gateway_method_response.options_proxy, # Added
+      aws_api_gateway_method_response.options_root,  # Added
+      aws_api_gateway_method_response.proxy_lambda   # Added
     ]))
   }
 
@@ -222,8 +223,9 @@ resource "aws_api_gateway_deployment" "deployment" {
     aws_api_gateway_integration_response.proxy_lambda,
     aws_api_gateway_integration_response.options_proxy,
     aws_api_gateway_integration_response.options_root,
-    aws_api_gateway_method_response.options_proxy,
-    aws_api_gateway_method_response.options_root
+    aws_api_gateway_method_response.options_proxy, # Added
+    aws_api_gateway_method_response.options_root,  # Added
+    aws_api_gateway_method_response.proxy_lambda   # Added
   ]
 }
 
