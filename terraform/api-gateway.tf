@@ -46,7 +46,7 @@ resource "aws_api_gateway_integration_response" "options_proxy" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
   }
@@ -72,7 +72,7 @@ resource "aws_api_gateway_method_response" "options_proxy" {
     "application/json" = "Empty"
   }
 
-  depends_on = [aws_api_gateway_integration.options_proxy]
+  depends_on = [aws_api_gateway_method.options_proxy]
 }
 
 # 🔓 OPTIONS Method for root `/`
@@ -106,7 +106,7 @@ resource "aws_api_gateway_integration_response" "options_root" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
   }
@@ -132,7 +132,7 @@ resource "aws_api_gateway_method_response" "options_root" {
     "application/json" = "Empty"
   }
 
-  depends_on = [aws_api_gateway_integration.options_root]
+  depends_on = [aws_api_gateway_method.options_root]
 }
 
 # 🔐 ANY method for /{proxy+}
@@ -161,7 +161,7 @@ resource "aws_api_gateway_integration_response" "proxy_lambda" {
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
@@ -205,7 +205,9 @@ resource "aws_api_gateway_deployment" "deployment" {
       aws_api_gateway_integration.options_root,
       aws_api_gateway_integration_response.proxy_lambda,
       aws_api_gateway_integration_response.options_proxy,
-      aws_api_gateway_integration_response.options_root
+      aws_api_gateway_integration_response.options_root,
+      aws_api_gateway_method_response.options_proxy, # Added
+      aws_api_gateway_method_response.options_root   # Added
     ]))
   }
 
@@ -219,7 +221,9 @@ resource "aws_api_gateway_deployment" "deployment" {
     aws_api_gateway_integration.options_root,
     aws_api_gateway_integration_response.proxy_lambda,
     aws_api_gateway_integration_response.options_proxy,
-    aws_api_gateway_integration_response.options_root
+    aws_api_gateway_integration_response.options_root,
+    aws_api_gateway_method_response.options_proxy, # Added
+    aws_api_gateway_method_response.options_root   # Added
   ]
 }
 
