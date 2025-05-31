@@ -6,16 +6,14 @@ variable "aws_region" {
 
 variable "domain_name" {
   description = "domain name"
-  default     = "alhagiebaicham.com"
+  type        = string
 }
 
 variable "frontend_url" {
   description = "Frontend domain name"
-  default     = "course.alhagiebaicham.com"
 }
 
 variable "api_domain_name" {
   description = "The domain name for the API Gateway"
   type        = string
-  default     = "api.alhagiebaicham.com"
 }
