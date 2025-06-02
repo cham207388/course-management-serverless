@@ -15,7 +15,7 @@ output "cloudfront_distribution_id" {
 
 output "frontend_url" {
   description = "URL to access the React frontend"
-  value       = "https://${var.frontend_url}"
+  value       = "https://${var.frontend_domain_name}"
 }
 
 output "api_invoke_url" {

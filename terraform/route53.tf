@@ -55,7 +55,7 @@ resource "aws_route53_record" "api" {
 # A record for frontend
 resource "aws_route53_record" "frontend" {
   zone_id = data.aws_route53_zone.selected.zone_id
-  name    = var.frontend_url
+  name    = var.frontend_domain_name
   type    = "A"
 
   alias {

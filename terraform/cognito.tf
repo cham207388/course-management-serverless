@@ -38,8 +38,8 @@ resource "aws_cognito_user_pool_client" "course_user_client" {
   allowed_oauth_flows                  = ["code", "implicit"]
   allowed_oauth_scopes                 = ["email", "openid", "profile"]
 
-  callback_urls = ["https://${var.frontend_url}"]
-  logout_urls   = ["https://${var.frontend_url}"]
+  callback_urls = ["https://${var.frontend_domain_name}"]
+  logout_urls   = ["https://${var.frontend_domain_name}"]
 }
 
 resource "aws_cognito_user_pool_domain" "this" {

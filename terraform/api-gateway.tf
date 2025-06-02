@@ -249,7 +249,7 @@ resource "aws_api_gateway_base_path_mapping" "mapping" {
 
 # Certificate for frontend domain
 resource "aws_acm_certificate" "frontend" {
-  domain_name       = var.frontend_url
+  domain_name       = var.frontend_domain_name
   validation_method = "DNS"
 
   lifecycle {

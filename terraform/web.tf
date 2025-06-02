@@ -1,7 +1,7 @@
 # This file is intentionally left empty as the frontend configuration has been moved to frontend/main.tf
 
 resource "aws_s3_bucket" "frontend" {
-  bucket        = var.frontend_url
+  bucket        = var.frontend_domain_name
   force_destroy = true
 }
 
@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
-  aliases             = [var.frontend_url]
+  aliases             = [var.frontend_domain_name]
 
   origin {
     domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
