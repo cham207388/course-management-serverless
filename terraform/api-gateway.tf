@@ -15,15 +15,6 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
-# 🔐 Cognito Authorizer (must be defined before methods that use it)
-resource "aws_api_gateway_authorizer" "cognito" {
-  name            = "course-cognito-authorizer"
-  rest_api_id     = aws_api_gateway_rest_api.course_management.id
-  type            = "COGNITO_USER_POOLS"
-  identity_source = "method.request.header.Authorization"
-  provider_arns   = [aws_cognito_user_pool.course_user_pool.arn]
-}
-
 # 🔓 OPTIONS Method for /{proxy+}
 resource "aws_api_gateway_method" "options_proxy" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
@@ -70,8 +61,8 @@ resource "aws_api_gateway_integration_response" "options_proxy_integration_respo
   status_code = aws_api_gateway_method_response.options_200.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'"
+    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE'"
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
@@ -126,8 +117,8 @@ resource "aws_api_gateway_integration_response" "options_root_integration_respon
   status_code = aws_api_gateway_method_response.options_root_200.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,PATCH,DELETE,HEAD'"
+    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE'"
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
@@ -136,7 +127,7 @@ resource "aws_api_gateway_integration_response" "options_root_integration_respon
   depends_on = [aws_api_gateway_integration.options_root]
 }
 
-# 🔐 ANY method for /{proxy+} (this will handle all methods)
+# 🔐 ANY method for /{proxy+}
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -154,7 +145,7 @@ resource "aws_api_gateway_integration" "proxy_lambda" {
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
-# Add CORS headers to the Lambda integration responses
+# Add CORS headers to the Lambda integration response
 resource "aws_api_gateway_method_response" "proxy_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
@@ -181,7 +172,98 @@ resource "aws_api_gateway_integration_response" "proxy_integration_response" {
   depends_on = [aws_api_gateway_integration.proxy_lambda]
 }
 
-# Error responses (4xx and 5xx)
+# 🔐 Cognito Authorizer
+resource "aws_api_gateway_authorizer" "cognito" {
+  name            = "course-cognito-authorizer"
+  rest_api_id     = aws_api_gateway_rest_api.course_management.id
+  type            = "COGNITO_USER_POOLS"
+  identity_source = "method.request.header.Authorization"
+  provider_arns   = [aws_cognito_user_pool.course_user_pool.arn]
+}
+
+# 🚀 Deployment & Stage
+resource "aws_api_gateway_deployment" "deployment" {
+  rest_api_id = aws_api_gateway_rest_api.course_management.id
+
+  triggers = {
+    redeploy_hash = sha1(jsonencode([
+      aws_api_gateway_method.proxy,
+      aws_api_gateway_method.options_proxy,
+      aws_api_gateway_method.options_root,
+      aws_api_gateway_integration.proxy_lambda,
+      aws_api_gateway_integration.options_proxy,
+      aws_api_gateway_integration.options_root,
+      aws_api_gateway_integration_response.proxy_integration_response,
+      aws_api_gateway_integration_response.options_proxy_integration_response,
+      aws_api_gateway_integration_response.options_root_integration_response
+    ]))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [
+    aws_api_gateway_integration.proxy_lambda,
+    aws_api_gateway_integration.options_proxy,
+    aws_api_gateway_integration.options_root
+  ]
+}
+
+resource "aws_api_gateway_stage" "dev" {
+  rest_api_id   = aws_api_gateway_rest_api.course_management.id
+  deployment_id = aws_api_gateway_deployment.deployment.id
+  stage_name    = "dev"
+}
+
+# 🌍 Custom Domain
+resource "aws_api_gateway_domain_name" "custom_domain" {
+  domain_name              = var.api_domain_name
+  regional_certificate_arn = aws_acm_certificate.api.arn
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  depends_on = [aws_acm_certificate_validation.api]
+}
+
+resource "aws_api_gateway_base_path_mapping" "mapping" {
+  domain_name = aws_api_gateway_domain_name.custom_domain.domain_name
+  api_id      = aws_api_gateway_rest_api.course_management.id
+  stage_name  = aws_api_gateway_stage.dev.stage_name
+}
+
+# Certificate for frontend domain
+resource "aws_acm_certificate" "frontend" {
+  domain_name       = var.frontend_url
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "frontend" {
+  certificate_arn         = aws_acm_certificate.frontend.arn
+  validation_record_fqdns = [for record in aws_acm_certificate.frontend.domain_validation_options : record.resource_record_name]
+}
+
+# Certificate for API Gateway
+resource "aws_acm_certificate" "api" {
+  domain_name       = var.api_domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "api" {
+  certificate_arn         = aws_acm_certificate.api.arn
+  validation_record_fqdns = [for record in aws_acm_certificate.api.domain_validation_options : record.resource_record_name]
+}
+
 resource "aws_api_gateway_method_response" "proxy_4xx" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
@@ -234,80 +316,4 @@ resource "aws_api_gateway_integration_response" "proxy_integration_response_5xx"
 
   selection_pattern = "5\\d{2}"
   depends_on        = [aws_api_gateway_integration.proxy_lambda]
-}
-
-# 🚀 Deployment & Stage
-resource "aws_api_gateway_deployment" "deployment" {
-  rest_api_id = aws_api_gateway_rest_api.course_management.id
-
-  triggers = {
-    redeploy_hash = sha1(jsonencode([
-      aws_api_gateway_resource.proxy,
-      aws_api_gateway_method.proxy,
-      aws_api_gateway_method.options_proxy,
-      aws_api_gateway_method.options_root,
-      aws_api_gateway_integration.proxy_lambda,
-      aws_api_gateway_integration.options_proxy,
-      aws_api_gateway_integration.options_root,
-      aws_api_gateway_authorizer.cognito
-    ]))
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [
-    aws_api_gateway_method.proxy,
-    aws_api_gateway_method.options_proxy,
-    aws_api_gateway_method.options_root,
-    aws_api_gateway_integration.proxy_lambda,
-    aws_api_gateway_integration.options_proxy,
-    aws_api_gateway_integration.options_root
-  ]
-}
-
-resource "aws_api_gateway_stage" "dev" {
-  rest_api_id   = aws_api_gateway_rest_api.course_management.id
-  deployment_id = aws_api_gateway_deployment.deployment.id
-  stage_name    = "dev"
-}
-
-# CloudWatch Log Group for API Gateway
-resource "aws_cloudwatch_log_group" "api_gateway" {
-  name              = "API-Gateway-Execution-Logs_${aws_api_gateway_rest_api.course_management.id}/dev"
-  retention_in_days = 7
-}
-
-# 🌍 Custom Domain
-resource "aws_api_gateway_domain_name" "custom_domain" {
-  domain_name              = var.api_domain_name
-  regional_certificate_arn = aws_acm_certificate.api.arn
-
-  endpoint_configuration {
-    types = ["REGIONAL"]
-  }
-
-  depends_on = [aws_acm_certificate_validation.api]
-}
-
-resource "aws_api_gateway_base_path_mapping" "mapping" {
-  domain_name = aws_api_gateway_domain_name.custom_domain.domain_name
-  api_id      = aws_api_gateway_rest_api.course_management.id
-  stage_name  = aws_api_gateway_stage.dev.stage_name
-}
-
-# Certificate for API Gateway
-resource "aws_acm_certificate" "api" {
-  domain_name       = var.api_domain_name
-  validation_method = "DNS"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_acm_certificate_validation" "api" {
-  certificate_arn         = aws_acm_certificate.api.arn
-  validation_record_fqdns = [for record in aws_acm_certificate.api.domain_validation_options : record.resource_record_name]
 }
