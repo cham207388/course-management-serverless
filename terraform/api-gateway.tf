@@ -35,7 +35,7 @@ resource "aws_api_gateway_integration" "options_proxy" {
   }
 }
 
-resource "aws_api_gateway_method_response" "options_proxy" {
+resource "aws_api_gateway_method_response" "options_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.options_proxy.http_method
@@ -54,15 +54,15 @@ resource "aws_api_gateway_method_response" "options_proxy" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "options_proxy" {
+resource "aws_api_gateway_integration_response" "options_proxy_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.options_proxy.http_method
-  status_code = aws_api_gateway_method_response.options_proxy.status_code
+  status_code = aws_api_gateway_method_response.options_200.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE'"
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
@@ -91,7 +91,7 @@ resource "aws_api_gateway_integration" "options_root" {
   }
 }
 
-resource "aws_api_gateway_method_response" "options_root" {
+resource "aws_api_gateway_method_response" "options_root_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_rest_api.course_management.root_resource_id
   http_method = aws_api_gateway_method.options_root.http_method
@@ -110,15 +110,15 @@ resource "aws_api_gateway_method_response" "options_root" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "options_root" {
+resource "aws_api_gateway_integration_response" "options_root_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_rest_api.course_management.root_resource_id
   http_method = aws_api_gateway_method.options_root.http_method
-  status_code = aws_api_gateway_method_response.options_root.status_code
+  status_code = aws_api_gateway_method_response.options_root_200.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Methods"     = "'OPTIONS,GET,POST,PUT,DELETE'"
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
@@ -145,7 +145,8 @@ resource "aws_api_gateway_integration" "proxy_lambda" {
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
-resource "aws_api_gateway_method_response" "proxy_lambda" {
+# Add CORS headers to the Lambda integration response
+resource "aws_api_gateway_method_response" "proxy_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.proxy.http_method
@@ -157,11 +158,11 @@ resource "aws_api_gateway_method_response" "proxy_lambda" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "proxy_lambda" {
+resource "aws_api_gateway_integration_response" "proxy_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.proxy.http_method
-  status_code = "200"
+  status_code = aws_api_gateway_method_response.proxy_200.status_code
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
@@ -192,9 +193,9 @@ resource "aws_api_gateway_deployment" "deployment" {
       aws_api_gateway_integration.proxy_lambda,
       aws_api_gateway_integration.options_proxy,
       aws_api_gateway_integration.options_root,
-      aws_api_gateway_integration_response.proxy_lambda,
-      aws_api_gateway_integration_response.options_proxy,
-      aws_api_gateway_integration_response.options_root
+      aws_api_gateway_integration_response.proxy_integration_response,
+      aws_api_gateway_integration_response.options_proxy_integration_response,
+      aws_api_gateway_integration_response.options_root_integration_response
     ]))
   }
 
@@ -214,8 +215,6 @@ resource "aws_api_gateway_stage" "dev" {
   deployment_id = aws_api_gateway_deployment.deployment.id
   stage_name    = "dev"
 }
-
-# 🌍 Custom Domain (keep your existing configuration)
 
 # 🌍 Custom Domain
 resource "aws_api_gateway_domain_name" "custom_domain" {
