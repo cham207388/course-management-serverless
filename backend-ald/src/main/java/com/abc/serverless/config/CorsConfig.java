@@ -11,13 +11,13 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class CorsConfig {
 
-    private static final String ALLOWED_ORIGIN = "https://course.alhagiebaicham.com";
+private static final List<String> ALLOWED_ORIGINS = List.of("https://course.alhagiebaicham.com", "http://localhost:5173", "http://localhost:5174");
 
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin(ALLOWED_ORIGIN);
+        config.setAllowedOrigins(ALLOWED_ORIGINS);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of(
             "Authorization",
