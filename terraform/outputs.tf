@@ -64,3 +64,12 @@ output "cognito_authorizer_issuer_url" {
 output "course_backend_url" {
   value = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}"
 }
+
+# Output the API Gateway URL
+output "api_gateway_url" {
+  value = aws_api_gateway_deployment.deployment.invoke_url
+}
+
+output "api_gateway_custom_domain_url" {
+  value = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}"
+}
