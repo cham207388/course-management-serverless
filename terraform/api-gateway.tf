@@ -271,24 +271,6 @@ resource "aws_api_gateway_stage" "dev" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   deployment_id = aws_api_gateway_deployment.deployment.id
   stage_name    = "dev"
-
-  # Enable CloudWatch logging
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
-    format = jsonencode({
-      requestId               = "$context.requestId",
-      ip                      = "$context.identity.sourceIp",
-      caller                  = "$context.identity.caller",
-      user                    = "$context.identity.user",
-      requestTime             = "$context.requestTime",
-      httpMethod              = "$context.httpMethod",
-      resourcePath            = "$context.resourcePath",
-      status                  = "$context.status",
-      protocol                = "$context.protocol",
-      responseLength          = "$context.responseLength",
-      integrationErrorMessage = "$context.integrationErrorMessage"
-    })
-  }
 }
 
 # CloudWatch Log Group for API Gateway
