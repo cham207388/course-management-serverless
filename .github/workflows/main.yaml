@@ -19,7 +19,7 @@ jobs:
           directory: ./backend-ald
           test: 'no'
 
-      - name: Deploy Lambda
+      - name: Deploy Infrastructure
         uses: cham207388/github-custom-actions/tf-no-ssh@main
         with:
           directory: ./terraform

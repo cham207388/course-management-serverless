@@ -16,7 +16,7 @@ jobs:
           directory: ./backend-ald
           test: 'no'
 
-      - name: Destroy Lambda
+      - name: Destroy Infrastructure
         uses: cham207388/github-custom-actions/tf-no-ssh@main
         with:
           directory: ./terraform
