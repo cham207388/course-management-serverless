@@ -43,7 +43,7 @@ jobs:
           echo "COGNITO_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
           echo "COGNITO_DOMAIN_URL=$(terraform output -raw cognito_domain_url)" >> $GITHUB_ENV
           echo "COGNITO_ISSUER_URL=$(terraform output -raw cognito_authorizer_issuer_url)" >> $GITHUB_ENV
-          echo "API_URL=$(terraform output -raw course_backend_url)/api/v2" >> $GITHUB_ENV
+          echo "API_URL=$(terraform output -raw course_backend_url)" >> $GITHUB_ENV
 
           echo "✅ Terraform outputs saved to GITHUB_ENV"
 

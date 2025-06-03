@@ -32,7 +32,7 @@ COGNITO_CLIENT_ID=$(terraform output -raw cognito_user_pool_client_id)
 COGNITO_REGION=$(terraform output -raw aws_region)
 COGNITO_DOMAIN_URL=$(terraform output -raw cognito_domain_url)
 COGNITO_ISSUER_URL=$(terraform output -raw cognito_authorizer_issuer_url)
-API_URL="$(terraform output -raw course_backend_url)/api/v2"
+API_URL="$(terraform output -raw course_backend_url)"
 cd ..
 
 # ───────────────────────────────────────────────
