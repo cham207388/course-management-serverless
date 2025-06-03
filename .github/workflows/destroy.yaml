@@ -23,5 +23,5 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
-          variables: "domain_name=${{ secrets.DOMAIN_NAME }}"
+          variables: "domain_name=${{ secrets.DOMAIN_NAME }},frontend_url=course.${{ secrets.DOMAIN_NAME }},api_domain_name=api.${{ secrets.DOMAIN_NAME }}"
           destroy: "yes"
