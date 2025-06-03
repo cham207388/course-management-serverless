@@ -124,7 +124,6 @@ resource "aws_api_gateway_integration_response" "options_root" {
 }
 
 # 🔐 ANY method for /{proxy+}
-# 🔐 ANY method for /{proxy+}
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -179,21 +178,6 @@ resource "aws_api_gateway_method_response" "proxy_lambda_500" {
   }
 }
 
-resource "aws_api_gateway_integration_response" "proxy_lambda_5xx" {
-  rest_api_id       = aws_api_gateway_rest_api.course_management.id
-  resource_id       = aws_api_gateway_resource.proxy.id
-  http_method       = aws_api_gateway_method.proxy.http_method
-  status_code       = "500"
-  selection_pattern = "5\\d{2}"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
-    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
-  }
-
-  depends_on = [aws_api_gateway_method_response.proxy_lambda_500]
-}
-
 # 🔐 Cognito Authorizer
 resource "aws_api_gateway_authorizer" "cognito" {
   name            = "course-cognito-authorizer"
@@ -215,7 +199,6 @@ resource "aws_api_gateway_deployment" "deployment" {
       aws_api_gateway_integration.proxy_lambda,
       aws_api_gateway_integration.options_proxy,
       aws_api_gateway_integration.options_root,
-      aws_api_gateway_integration_response.proxy_lambda,
       aws_api_gateway_integration_response.options_proxy,
       aws_api_gateway_integration_response.options_root
     ]))
@@ -228,10 +211,7 @@ resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
     aws_api_gateway_integration.proxy_lambda,
     aws_api_gateway_integration.options_proxy,
-    aws_api_gateway_integration.options_root,
-    aws_api_gateway_integration_response.proxy_lambda,
-    aws_api_gateway_integration_response.options_proxy,
-    aws_api_gateway_integration_response.options_root
+    aws_api_gateway_integration.options_root
   ]
 }
 
