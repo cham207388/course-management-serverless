@@ -59,7 +59,7 @@ resource "aws_api_gateway_integration_response" "options_proxy" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Requested-With,Accept,Accept-Encoding,Accept-Language,Origin,Access-Control-Request-Method,Access-Control-Request-Headers'"
     "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
   }
@@ -115,7 +115,7 @@ resource "aws_api_gateway_integration_response" "options_root" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://course.alhagiebaicham.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'*'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
   }
@@ -141,8 +141,8 @@ resource "aws_api_gateway_integration" "proxy_lambda" {
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
-# Method responses for CORS headers
-resource "aws_api_gateway_method_response" "proxy_lambda" {
+# Method responses for CORS headers (needed even with AWS_PROXY)
+resource "aws_api_gateway_method_response" "proxy_lambda_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.proxy.http_method
@@ -211,7 +211,10 @@ resource "aws_api_gateway_deployment" "deployment" {
   depends_on = [
     aws_api_gateway_integration.proxy_lambda,
     aws_api_gateway_integration.options_proxy,
-    aws_api_gateway_integration.options_root
+    aws_api_gateway_integration.options_root,
+    aws_api_gateway_method_response.proxy_lambda_200,
+    aws_api_gateway_method_response.proxy_lambda_400,
+    aws_api_gateway_method_response.proxy_lambda_500
   ]
 }
 
