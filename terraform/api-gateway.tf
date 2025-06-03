@@ -11,7 +11,7 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
-# 🔓 OPTIONS Method for /{proxy+}
+# OPTIONS Method for /{proxy+}
 resource "aws_api_gateway_method" "options_proxy" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -67,7 +67,7 @@ resource "aws_api_gateway_integration_response" "options_proxy" {
   depends_on = [aws_api_gateway_method_response.options_proxy]
 }
 
-# 🔓 OPTIONS Method for root `/`
+# OPTIONS Method for root `/`
 resource "aws_api_gateway_method" "options_root" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_rest_api.course_management.root_resource_id
@@ -115,7 +115,7 @@ resource "aws_api_gateway_integration_response" "options_root" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"      = "'*'"
+    "method.response.header.Access-Control-Allow-Origin"      = "'${local.allowed_origin}'"
     "method.response.header.Access-Control-Allow-Credentials" = "'true'"
     "method.response.header.Access-Control-Max-Age"           = "'7200'"
   }
@@ -123,7 +123,7 @@ resource "aws_api_gateway_integration_response" "options_root" {
   depends_on = [aws_api_gateway_method_response.options_root]
 }
 
-# 🔐 ANY method for /{proxy+}
+# ANY method for /{proxy+}
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = aws_api_gateway_rest_api.course_management.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -141,7 +141,7 @@ resource "aws_api_gateway_integration" "proxy_lambda" {
   uri                     = aws_lambda_function.course_management.invoke_arn
 }
 
-# Method responses for CORS headers (needed even with AWS_PROXY)
+# Method responses for CORS headers
 resource "aws_api_gateway_method_response" "proxy_lambda_200" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
   resource_id = aws_api_gateway_resource.proxy.id
@@ -178,7 +178,7 @@ resource "aws_api_gateway_method_response" "proxy_lambda_500" {
   }
 }
 
-# 🔐 Cognito Authorizer
+# Cognito Authorizer
 resource "aws_api_gateway_authorizer" "cognito" {
   name            = "course-cognito-authorizer"
   rest_api_id     = aws_api_gateway_rest_api.course_management.id
@@ -187,7 +187,7 @@ resource "aws_api_gateway_authorizer" "cognito" {
   provider_arns   = [aws_cognito_user_pool.course_user_pool.arn]
 }
 
-# 🚀 Deployment & Stage
+# Deployment & Stage
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.course_management.id
 
@@ -224,7 +224,7 @@ resource "aws_api_gateway_stage" "dev" {
   stage_name    = "dev"
 }
 
-# 🌍 Custom Domain
+# Custom Domain
 resource "aws_api_gateway_domain_name" "custom_domain" {
   domain_name              = var.api_domain_name
   regional_certificate_arn = aws_acm_certificate.api.arn
