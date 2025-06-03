@@ -42,4 +42,7 @@ public class CorsConfig {
 
         return new CorsFilter(source);
     }
+
+    // NOTE: For AWS API Gateway, CORS headers must be set at the gateway level for preflight and error responses.
+    // This config is still useful for local/dev and Lambda-invoked requests.
 }
