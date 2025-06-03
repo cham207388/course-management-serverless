@@ -16,12 +16,12 @@ jobs:
           directory: ./backend-ald
           test: 'no'
 
-      - name: Destroy Lambda
+      - name: Destroy Infrastructure
         uses: cham207388/github-custom-actions/tf-no-ssh@main
         with:
           directory: ./terraform
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
-          variables: "domain_name=${{ secrets.DOMAIN_NAME }},frontend_domain=course.${{ secrets.DOMAIN_NAME }},api_domain_name=api.${{ secrets.DOMAIN_NAME }}"
+          variables: "domain_name=${{ secrets.DOMAIN_NAME }},frontend_domain_name=course.${{ secrets.DOMAIN_NAME }},api_domain_name=api.${{ secrets.DOMAIN_NAME }}"
           destroy: "yes"
