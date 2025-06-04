@@ -10,7 +10,7 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
-# Enable CORS for all methods
+# Enhanced CORS Configuration
 module "cors" {
   source  = "squidfunk/api-gateway-enable-cors/aws"
   version = "0.3.3"
@@ -27,11 +27,11 @@ module "cors" {
     "'X-Amz-Security-Token'",
     "'X-Requested-With'"
   ]
-  allow_methods     = ["'GET'", "'POST'", "'PUT'", "'DELETE'", "'OPTIONS'"]
+  allow_methods     = ["'GET'", "'POST'", "'PUT'", "'DELETE'", "'OPTIONS'", "'PATCH'"]
   allow_credentials = true
 }
 
-# Regular API Methods
+# API Methods with Integration Timeout
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = aws_api_gateway_rest_api.course_api.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -47,6 +47,7 @@ resource "aws_api_gateway_integration" "lambda" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.course_backend.invoke_arn
+  timeout_milliseconds    = 29000 # API Gateway max timeout
 }
 
 # Root resource configuration
@@ -65,26 +66,19 @@ resource "aws_api_gateway_integration" "lambda_root" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.course_backend.invoke_arn
+  timeout_milliseconds    = 29000
 }
 
-# Deployment
+# Deployment with proper stage management
 resource "aws_api_gateway_deployment" "course_api" {
   depends_on = [
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
-    module.cors
+    module.cors,
+    aws_lambda_permission.apigw
   ]
 
   rest_api_id = aws_api_gateway_rest_api.course_api.id
-  description = "Course API deployment"
-
-  triggers = {
-    redeployment = sha1(jsonencode([
-      aws_api_gateway_integration.lambda,
-      aws_api_gateway_integration.lambda_root,
-      module.cors
-    ]))
-  }
 
   lifecycle {
     create_before_destroy = true
@@ -95,6 +89,28 @@ resource "aws_api_gateway_stage" "prod" {
   stage_name    = "prod"
   rest_api_id   = aws_api_gateway_rest_api.course_api.id
   deployment_id = aws_api_gateway_deployment.course_api.id
+
+  # Enable detailed logging
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gw.arn
+    format = jsonencode({
+      requestId        = "$context.requestId",
+      ip               = "$context.identity.sourceIp",
+      requestTime      = "$context.requestTime",
+      httpMethod       = "$context.httpMethod",
+      routeKey         = "$context.routeKey",
+      status           = "$context.status",
+      protocol         = "$context.protocol",
+      responseLength   = "$context.responseLength",
+      integrationError = "$context.integration.error"
+    })
+  }
+}
+
+# CloudWatch Log Group for API Gateway
+resource "aws_cloudwatch_log_group" "api_gw" {
+  name              = "/aws/api-gateway/${aws_api_gateway_rest_api.course_api.name}"
+  retention_in_days = 7
 }
 
 # API Gateway Custom Domain
