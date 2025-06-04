@@ -4,11 +4,6 @@ resource "aws_s3_bucket" "frontend" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket_acl" "frontend" {
-  bucket = aws_s3_bucket.frontend.id
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_public_access_block" "frontend" {
   bucket = aws_s3_bucket.frontend.id
 
