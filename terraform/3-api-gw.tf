@@ -1,9 +1,3 @@
-locals {
-  frontend_domain  = "${var.frontend_subdomain}.${var.domain_name}"
-  api_domain       = "${var.api_subdomain}.${var.domain_name}"
-  sanitized_domain = replace(var.domain_name, ".", "-")
-}
-
 # API Gateway (REST API)
 resource "aws_api_gateway_rest_api" "course_api" {
   name        = "course-api"
@@ -72,7 +66,7 @@ resource "aws_api_gateway_stage" "prod" {
   deployment_id = aws_api_gateway_deployment.course_api.id
 }
 
-# CORS Configuration
+# Improved CORS Configuration
 resource "aws_api_gateway_method" "options" {
   rest_api_id   = aws_api_gateway_rest_api.course_api.id
   resource_id   = aws_api_gateway_resource.proxy.id
@@ -80,16 +74,17 @@ resource "aws_api_gateway_method" "options" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_method_response" "options" {
+resource "aws_api_gateway_method_response" "options_200" {
   rest_api_id = aws_api_gateway_rest_api.course_api.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.options.http_method
   status_code = "200"
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true,
-    "method.response.header.Access-Control-Allow-Methods" = true,
-    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Headers"     = true,
+    "method.response.header.Access-Control-Allow-Methods"     = true,
+    "method.response.header.Access-Control-Allow-Origin"      = true,
+    "method.response.header.Access-Control-Allow-Credentials" = true
   }
 
   response_models = {
@@ -101,9 +96,7 @@ resource "aws_api_gateway_integration" "options" {
   rest_api_id = aws_api_gateway_rest_api.course_api.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.options.http_method
-
-  type             = "MOCK"
-  content_handling = "CONVERT_TO_TEXT"
+  type        = "MOCK"
 
   request_templates = {
     "application/json" = "{\"statusCode\": 200}"
@@ -114,13 +107,13 @@ resource "aws_api_gateway_integration_response" "options" {
   rest_api_id = aws_api_gateway_rest_api.course_api.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.options.http_method
-  status_code = aws_api_gateway_method_response.options.status_code
+  status_code = aws_api_gateway_method_response.options_200.status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'",
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-    # "method.response.header.Access-Control-Allow-Origin"  = "'https://${local.frontend_domain}'"
+    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods"     = "'GET,POST,PUT,DELETE,OPTIONS'",
+    "method.response.header.Access-Control-Allow-Origin"      = "'*'",
+    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
   }
 
   depends_on = [aws_api_gateway_integration.options]
@@ -140,6 +133,6 @@ resource "aws_api_gateway_domain_name" "api" {
 
 resource "aws_api_gateway_base_path_mapping" "api" {
   api_id      = aws_api_gateway_rest_api.course_api.id
-  stage_name  = aws_api_gateway_deployment.course_api.stage_name
+  stage_name  = aws_api_gateway_stage.prod.stage_name # Fixed deprecation warning
   domain_name = aws_api_gateway_domain_name.api.domain_name
 }
