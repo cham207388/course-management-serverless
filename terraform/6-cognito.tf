@@ -1,39 +1,30 @@
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 # Cognito User Pool
 resource "aws_cognito_user_pool" "users" {
-  name = "course-users"
-
+  name                     = "course-users"
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
   password_policy {
-    minimum_length                   = 8
-    require_lowercase                = true
-    require_numbers                  = true
-    require_symbols                  = true
-    require_uppercase                = true
-    temporary_password_validity_days = 7
+    minimum_length    = 8
+    require_uppercase = true
+    require_lowercase = true
+    require_numbers   = true
+    require_symbols   = false
   }
 
-  schema {
-    name                = "email"
-    attribute_data_type = "String"
-    required            = true
-    mutable             = true
-
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 256
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
     }
   }
 
-  verification_message_template {
-    default_email_option = "CONFIRM_WITH_CODE"
-    email_subject        = "Your verification code"
-    email_message        = "Your verification code is {####}"
-  }
-
-  email_configuration {
-    email_sending_account = "COGNITO_DEFAULT"
+  admin_create_user_config {
+    allow_admin_create_user_only = false
   }
 }
 
@@ -41,8 +32,7 @@ resource "aws_cognito_user_pool_client" "web_client" {
   name         = "web-client"
   user_pool_id = aws_cognito_user_pool.users.id
 
-  generate_secret     = false
-  explicit_auth_flows = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
+  generate_secret = false
 
   callback_urls                = ["https://${local.frontend_domain}", "http://localhost:5173"]
   logout_urls                  = ["https://${local.frontend_domain}", "http://localhost:5173"]
@@ -57,6 +47,6 @@ resource "aws_cognito_user_pool_client" "web_client" {
 }
 
 resource "aws_cognito_user_pool_domain" "auth" {
-  domain       = "auth-${local.sanitized_domain}"
+  domain       = "auth-${local.sanitized_domain}-${random_id.suffix.hex}"
   user_pool_id = aws_cognito_user_pool.users.id
 }
