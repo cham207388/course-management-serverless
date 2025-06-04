@@ -44,8 +44,8 @@ resource "aws_cognito_user_pool_client" "web_client" {
   generate_secret     = false
   explicit_auth_flows = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
 
-  callback_urls                = ["https://${local.frontend_domain}"]
-  logout_urls                  = ["https://${local.frontend_domain}"]
+  callback_urls                = ["https://${local.frontend_domain}", "http://localhost:5173"]
+  logout_urls                  = ["https://${local.frontend_domain}", "http://localhost:5173"]
   default_redirect_uri         = "https://${local.frontend_domain}"
   supported_identity_providers = ["COGNITO"]
 
