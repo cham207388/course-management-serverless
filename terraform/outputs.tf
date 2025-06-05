@@ -20,7 +20,7 @@ output "frontend_url" {
 
 output "api_invoke_url" {
   description = "Default API Gateway endpoint (not used in production)"
-  value       = "https://${aws_api_gateway_rest_api.course_management.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.dev.stage_name}"
+  value       = "https://${aws_api_gateway_rest_api.course_api.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.prod.stage_name}"
 }
 
 # ───────────────────────────────────────────────
@@ -62,5 +62,5 @@ output "cognito_authorizer_issuer_url" {
 # ───────────────────────────────────────────────
 
 output "course_backend_url" {
-  value = "https://${aws_api_gateway_domain_name.custom_domain.domain_name}"
+  value = "https://${aws_api_gateway_domain_name.api.domain_name}"
 }

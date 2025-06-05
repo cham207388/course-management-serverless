@@ -75,7 +75,7 @@ resource "aws_api_gateway_deployment" "course_api" {
     aws_api_gateway_integration.lambda,
     aws_api_gateway_integration.lambda_root,
     module.cors,
-    aws_lambda_permission.apigw
+    aws_lambda_permission.allow_apigw
   ]
 
   rest_api_id = aws_api_gateway_rest_api.course_api.id
@@ -122,7 +122,7 @@ resource "aws_api_gateway_domain_name" "api" {
     types = ["REGIONAL"]
   }
 
-  depends_on = [aws_acm_certificate_validation.cert]
+  depends_on = [aws_acm_certificate_validation.api]
 }
 
 resource "aws_api_gateway_base_path_mapping" "api" {
