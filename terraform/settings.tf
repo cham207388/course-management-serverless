@@ -10,11 +10,12 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "project-terraform-state-abc"
-    key          = "course-management/terraform.tfstate"
-    region       = "us-east-2"
-    encrypt      = true
-    use_lockfile = true
+    bucket         = "project-terraform-state-abc"
+    key            = "course-management/terraform.tfstate"
+    region         = "us-east-2"
+    dynamodb_table = "project-terraform-state-lock"
+    # encrypt      = true
+    # use_lockfile = true
   }
 }
 
