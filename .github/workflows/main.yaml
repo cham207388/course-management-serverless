@@ -19,14 +19,14 @@ jobs:
           directory: ./backend-ald
           test: 'no'
 
-      - name: Deploy Lambda
+      - name: Deploy Infrastructure
         uses: cham207388/github-custom-actions/tf-no-ssh@main
         with:
           directory: ./terraform
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
-          variables: "domain_name=${{ secrets.DOMAIN_NAME }}"
+          variables: "domain_name=${{ secrets.DOMAIN_NAME }},frontend_domain_name=course.${{ secrets.DOMAIN_NAME }},api_domain_name=api.${{ secrets.DOMAIN_NAME }}"
           
       - name: ✅ Save Terraform Outputs
         id: tf_outputs
@@ -43,7 +43,7 @@ jobs:
           echo "COGNITO_REGION=$(terraform output -raw aws_region)" >> $GITHUB_ENV
           echo "COGNITO_DOMAIN_URL=$(terraform output -raw cognito_domain_url)" >> $GITHUB_ENV
           echo "COGNITO_ISSUER_URL=$(terraform output -raw cognito_authorizer_issuer_url)" >> $GITHUB_ENV
-          echo "API_URL=$(terraform output -raw course_backend_url)/api/v2" >> $GITHUB_ENV
+          echo "API_URL=$(terraform output -raw course_backend_url)" >> $GITHUB_ENV
 
           echo "✅ Terraform outputs saved to GITHUB_ENV"
 

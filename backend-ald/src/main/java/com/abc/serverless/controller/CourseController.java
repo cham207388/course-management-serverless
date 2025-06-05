@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v2/courses")
+@RequestMapping("/courses")
 @RequiredArgsConstructor
 public class CourseController {
 

@@ -46,8 +46,8 @@ resource "aws_route53_record" "api" {
   type    = "A"
 
   alias {
-    name                   = aws_api_gateway_domain_name.custom_domain.regional_domain_name
-    zone_id                = aws_api_gateway_domain_name.custom_domain.regional_zone_id
+    name                   = aws_api_gateway_domain_name.api.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.api.regional_zone_id
     evaluate_target_health = false
   }
 }
@@ -55,7 +55,7 @@ resource "aws_route53_record" "api" {
 # A record for frontend
 resource "aws_route53_record" "frontend" {
   zone_id = data.aws_route53_zone.selected.zone_id
-  name    = var.frontend_url
+  name    = var.frontend_domain_name
   type    = "A"
 
   alias {
@@ -63,19 +63,4 @@ resource "aws_route53_record" "frontend" {
     zone_id                = aws_cloudfront_distribution.frontend_cdn.hosted_zone_id
     evaluate_target_health = false
   }
-}
-
-# backend
-resource "aws_route53_record" "couse_be_alias" {
-  zone_id = data.aws_route53_zone.primary.zone_id
-  name    = "coursebe.${var.domain_name}"
-  type    = "A"
-
-  alias {
-    name                   = aws_api_gateway_domain_name.custom_domain.regional_domain_name
-    zone_id                = aws_api_gateway_domain_name.custom_domain.regional_zone_id
-    evaluate_target_health = false
-  }
-
-  depends_on = [aws_api_gateway_domain_name.custom_domain]
 }

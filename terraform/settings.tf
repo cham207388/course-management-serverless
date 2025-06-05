@@ -10,20 +10,15 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "project-terraform-state-abc"
-    key            = "course-management/terraform.tfstate"
-    region         = "us-east-2"
-    dynamodb_table = "project-terraform-state-lock"
+    bucket = "project-terraform-state-abc"
+    key    = "course-management/terraform.tfstate"
+    region = "us-east-2"
+    # dynamodb_table = "project-terraform-state-lock"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
 provider "aws" {
-  region = "us-east-1"
-}
-
-# for creating acm certificate via terraform
-# I created it manually
-provider "aws" {
-  alias  = "us-east-1"
   region = "us-east-1"
 }

@@ -1,7 +1,7 @@
 # This file is intentionally left empty as the frontend configuration has been moved to frontend/main.tf
 
 resource "aws_s3_bucket" "frontend" {
-  bucket        = var.frontend_url
+  bucket        = var.frontend_domain_name
   force_destroy = true
 }
 
@@ -35,9 +35,9 @@ resource "aws_s3_bucket_policy" "public_read" {
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {
-  bucket = aws_s3_bucket.frontend.bucket
+  bucket = aws_s3_bucket.frontend.id
 
-  block_public_acls       = true
+  block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = true
   restrict_public_buckets = false
@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "frontend_cdn" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
-  aliases             = [var.frontend_url]
+  aliases             = [var.frontend_domain_name]
 
   origin {
     domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
