@@ -1,5 +1,5 @@
 output "aws_region" {
-  description = "Region where the stack is deployed"
+  description = "Region where the stack is deployed (us-east-1)"
   value       = var.aws_region
 }
 
