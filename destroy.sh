@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-echo "🌍 Starting Full Local Deployment..."
+echo "🌍 Starting destruction..."
 
 # ───────────────────────────────────────────────
 # 📦 Build Backend with Maven (Java 21)
@@ -13,10 +13,13 @@ mvn clean package -DskipTests
 cd ..
 
 # ───────────────────────────────────────────────
-# 🧱 Terraform Init + Plan + Apply
+# 🧱 Terraform Destroy
 # ───────────────────────────────────────────────
-echo "🌱 Deploying infrastructure with Terraform..."
+echo "🌱 Destroying infrastructure with Terraform..."
 cd terraform
 terraform init --upgrade
 terraform validate
 terraform destroy -auto-approve
+cd ..
+
+echo "✅ Destruction complete!"
