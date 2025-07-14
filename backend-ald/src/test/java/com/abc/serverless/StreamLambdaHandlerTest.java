@@ -68,6 +68,24 @@ public class StreamLambdaHandlerTest {
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
     }
 
+    @Test
+    public void healthCheck_streamRequest_returns200() {
+        InputStream requestStream = new AwsProxyRequestBuilder("/checking", HttpMethod.GET)
+                                            .header(HttpHeaders.ACCEPT, MediaType.TEXT_PLAIN)
+                                            .buildStream();
+        ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+
+        handle(requestStream, responseStream);
+
+        AwsProxyResponse response = readResponse(responseStream);
+        assertNotNull(response);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatusCode());
+
+        assertFalse(response.isBase64Encoded());
+
+        assertTrue(response.getBody().contains("API is running"));
+    }
+
     private void handle(InputStream is, ByteArrayOutputStream os) {
         try {
             handler.handleRequest(is, os, lambdaContext);
