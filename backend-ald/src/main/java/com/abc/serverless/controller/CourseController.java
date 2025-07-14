@@ -55,7 +55,7 @@ public class CourseController {
     @GetMapping(value = "/name/{name}", produces = "application/json")
     public ResponseEntity<Course> getCourseByName(@PathVariable String name, HttpServletRequest request) {
         String username = securityService.extractUsernameFromToken(request);
-        Optional<Course> course = courseService.getCourseById(name, username);
+        Optional<Course> course = courseService.getCourseByName(name, username);
         return course.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
