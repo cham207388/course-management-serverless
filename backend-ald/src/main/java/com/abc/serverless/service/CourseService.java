@@ -46,6 +46,15 @@ public class CourseService {
                 : Optional.empty();
     }
 
+    public Optional<Course> getCourseByName(String name, String owner) {
+        log.info("Getting course with name {} from DynamoDB", name);
+        return courseTable.scan()
+                .items()
+                .stream()
+                .filter(course -> owner.equals(course.getOwner()) && name.equals(course.getName()))
+                .findFirst();
+    }
+
     public boolean updateCourse(Course newCourse,String id, String owner) {
         log.info("Updating course with ID {} from DynamoDB", id);
         Course existing = courseTable.getItem(r -> r.key(k -> k.partitionValue(id)));
